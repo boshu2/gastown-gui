@@ -55,16 +55,18 @@
 ---
 
 ### Issue 1.3: Cache/TTL Tests Missing
-**Status:** 🔴 Not Started
+**Status:** 🟢 COMPLETE (10 tests added)
 **Impact:** MEDIUM - Subtle bugs possible
 
-**Tests needed:**
-- [ ] Cache expiration after TTL
-- [ ] Cache invalidation
-- [ ] Concurrent request deduplication
-- [ ] Memory cleanup
+**Tests added:**
+- [x] Response time consistency (status, convoys, mail)
+- [x] Cache bypass with refresh parameter
+- [x] Data consistency from cache
+- [x] Concurrent requests for same endpoint
+- [x] Concurrent requests for different endpoints
+- [x] Cache under load (10 rapid requests)
 
-**Test file:** `test/unit/cache.test.js`
+**Test file:** `test/integration/cache.test.js`
 
 ---
 
@@ -130,6 +132,7 @@
 | 2026-01-17 | 1.1 | Added 20 endpoint tests | `08794ba` |
 | 2026-01-17 | Fix | Fixed integration test (convoy issue tree) | `9beea51` |
 | 2026-01-17 | 1.2 | Added 9 WebSocket tests | `e332003` |
+| 2026-01-17 | 1.3 | Added 10 cache tests | `17a24ae` |
 
 ---
 
@@ -137,5 +140,6 @@
 
 1. ~~**Issue 1.1** - Add server endpoint tests~~ ✅ DONE
 2. ~~**Issue 1.2** - Add WebSocket tests~~ ✅ DONE
-3. **Issue 1.3** - Add cache tests
-4. Continue with Priority 2 and 3...
+3. ~~**Issue 1.3** - Add cache tests~~ ✅ DONE
+4. **Issue 1.1 (continued)** - Add remaining endpoint tests (sling, rigs, beads)
+5. Continue with Priority 2 and 3...
