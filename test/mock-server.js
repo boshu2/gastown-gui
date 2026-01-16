@@ -178,6 +178,78 @@ app.get('/api/agents', (req, res) => {
   res.json(mockData.status.agents);
 });
 
+// Rig management endpoints
+const mockRigs = [
+  { name: 'zoo-game', path: '/home/user/gt/zoo-game', url: 'https://github.com/web3dev1337/zoo-game', status: 'active' },
+  { name: 'gastown', path: '/home/user/gt/gastown', url: 'https://github.com/steveyegge/gastown', status: 'active' },
+];
+
+app.get('/api/rigs', (req, res) => {
+  res.json(mockRigs);
+});
+
+app.post('/api/rigs', (req, res) => {
+  const { name, url } = req.body;
+  if (!name || !url) {
+    return res.status(400).json({ error: 'Missing required fields: name, url' });
+  }
+  const newRig = { name, url, path: `/home/user/gt/${name}`, status: 'active' };
+  mockRigs.push(newRig);
+  res.status(201).json({ success: true, rig: newRig });
+});
+
+app.delete('/api/rigs/:name', (req, res) => {
+  const { name } = req.params;
+  const index = mockRigs.findIndex(r => r.name === name);
+  if (index === -1) {
+    return res.status(404).json({ error: 'Rig not found' });
+  }
+  mockRigs.splice(index, 1);
+  res.json({ success: true, removed: name });
+});
+
+// Doctor/diagnostics endpoints
+app.get('/api/doctor', (req, res) => {
+  res.json({
+    status: 'healthy',
+    checks: [
+      { name: 'git', status: 'ok', message: 'Git 2.43.0 installed' },
+      { name: 'beads', status: 'ok', message: 'beads 0.44.0 installed' },
+      { name: 'tmux', status: 'ok', message: 'tmux 3.4 installed' },
+      { name: 'workspace', status: 'ok', message: 'Workspace configured at ~/gt' },
+    ],
+    timestamp: new Date().toISOString(),
+  });
+});
+
+app.post('/api/doctor/fix', (req, res) => {
+  res.json({
+    success: true,
+    fixed: ['tmux session cleanup', 'stale lock removal'],
+    timestamp: new Date().toISOString(),
+  });
+});
+
+app.get('/api/setup/status', (req, res) => {
+  res.json({
+    installed: true,
+    workspace: '~/gt',
+    rigs: mockRigs.length,
+    agents: mockData.status.agents.length,
+    ready: true,
+  });
+});
+
+app.get('/api/hook', (req, res) => {
+  res.json({
+    status: 'active',
+    hooks: [
+      { name: 'pre-commit', enabled: true },
+      { name: 'post-merge', enabled: true },
+    ],
+  });
+});
+
 app.post('/api/nudge', (req, res) => {
   const { target, message } = req.body;
   res.json({ success: true, target, message });

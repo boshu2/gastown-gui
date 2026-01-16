@@ -237,6 +237,233 @@ describe('API Endpoint Tests', () => {
 
 });
 
+describe('POST /api/sling', () => {
+  it('should dispatch work to an agent', async () => {
+    const { status, data, ok } = await api('/api/sling', {
+      method: 'POST',
+      body: JSON.stringify({
+        bead: 'test-bead-123',
+        target: 'zoo-game/Polecat-1',
+        molecule: 'test-molecule',
+        quality: 'normal',
+      }),
+    });
+
+    expect(ok).toBe(true);
+    expect(status).toBe(200);
+    expect(data).toHaveProperty('id');
+    expect(data).toHaveProperty('status', 'dispatched');
+  });
+});
+
+describe('GET /api/hook', () => {
+  it('should return hook status', async () => {
+    const { status, data, ok } = await api('/api/hook');
+
+    expect(ok).toBe(true);
+    expect(status).toBe(200);
+    expect(data).toHaveProperty('status');
+  });
+});
+
+describe('POST /api/mail', () => {
+  it('should send a mail message', async () => {
+    const { status, data, ok } = await api('/api/mail', {
+      method: 'POST',
+      body: JSON.stringify({
+        to: 'agent-1',
+        subject: 'Test subject',
+        message: 'Test message body',
+        priority: 'normal',
+      }),
+    });
+
+    expect(ok).toBe(true);
+    expect(status).toBe(200);
+    expect(data).toHaveProperty('success', true);
+    expect(data).toHaveProperty('mail');
+    expect(data.mail).toHaveProperty('id');
+  });
+});
+
+describe('GET /api/beads/search', () => {
+  it('should search beads by query', async () => {
+    const { status, data, ok } = await api('/api/beads/search?q=login');
+
+    expect(ok).toBe(true);
+    expect(status).toBe(200);
+    expect(Array.isArray(data)).toBe(true);
+  });
+
+  it('should return empty array for no matches', async () => {
+    const { status, data, ok } = await api('/api/beads/search?q=nonexistentxyz123');
+
+    expect(ok).toBe(true);
+    expect(status).toBe(200);
+    expect(Array.isArray(data)).toBe(true);
+  });
+});
+
+describe('GET /api/formulas/search', () => {
+  it('should search formulas by query', async () => {
+    const { status, data, ok } = await api('/api/formulas/search?q=test');
+
+    expect(ok).toBe(true);
+    expect(status).toBe(200);
+    expect(Array.isArray(data)).toBe(true);
+  });
+});
+
+describe('GET /api/targets', () => {
+  it('should return available sling targets', async () => {
+    const { status, data, ok } = await api('/api/targets');
+
+    expect(ok).toBe(true);
+    expect(status).toBe(200);
+    expect(Array.isArray(data)).toBe(true);
+  });
+
+  it('should include target details', async () => {
+    const { data } = await api('/api/targets');
+
+    if (data.length > 0) {
+      const target = data[0];
+      expect(target).toHaveProperty('id');
+      expect(target).toHaveProperty('name');
+      expect(target).toHaveProperty('type');
+    }
+  });
+});
+
+describe('POST /api/escalate', () => {
+  it('should escalate a convoy', async () => {
+    const { status, data, ok } = await api('/api/escalate', {
+      method: 'POST',
+      body: JSON.stringify({
+        convoy_id: 'convoy-123',
+        reason: 'Blocked on dependency',
+        priority: 'high',
+      }),
+    });
+
+    expect(ok).toBe(true);
+    expect(status).toBe(200);
+    expect(data).toHaveProperty('success', true);
+  });
+});
+
+describe('GET /api/github/repos', () => {
+  it('should return list of GitHub repos', async () => {
+    const { status, data, ok } = await api('/api/github/repos');
+
+    expect(ok).toBe(true);
+    expect(status).toBe(200);
+    expect(Array.isArray(data)).toBe(true);
+  });
+
+  it('should include repo details', async () => {
+    const { data } = await api('/api/github/repos');
+
+    if (data.length > 0) {
+      const repo = data[0];
+      expect(repo).toHaveProperty('name');
+      expect(repo).toHaveProperty('url');
+    }
+  });
+});
+
+describe('Rig Management', () => {
+  it('should list rigs', async () => {
+    const { status, data, ok } = await api('/api/rigs');
+
+    expect(ok).toBe(true);
+    expect(status).toBe(200);
+    expect(Array.isArray(data)).toBe(true);
+  });
+
+  it('should add a new rig', async () => {
+    const { status, data, ok } = await api('/api/rigs', {
+      method: 'POST',
+      body: JSON.stringify({
+        name: 'test-rig',
+        url: 'https://github.com/test/repo',
+      }),
+    });
+
+    expect(ok).toBe(true);
+    expect([200, 201]).toContain(status);
+    expect(data).toHaveProperty('success', true);
+  });
+
+  it('should reject add rig without required fields', async () => {
+    const { status } = await api('/api/rigs', {
+      method: 'POST',
+      body: JSON.stringify({ name: 'incomplete' }),
+    });
+
+    expect(status).toBe(400);
+  });
+
+  it('should delete a rig', async () => {
+    // First ensure we have a rig to delete
+    await api('/api/rigs', {
+      method: 'POST',
+      body: JSON.stringify({
+        name: 'delete-test-rig',
+        url: 'https://github.com/test/delete-repo',
+      }),
+    });
+
+    const { status, data, ok } = await api('/api/rigs/delete-test-rig', {
+      method: 'DELETE',
+    });
+
+    expect(ok).toBe(true);
+    expect(status).toBe(200);
+    expect(data).toHaveProperty('success', true);
+  });
+
+  it('should return 404 for non-existent rig deletion', async () => {
+    const { status } = await api('/api/rigs/non-existent-rig-xyz', {
+      method: 'DELETE',
+    });
+
+    expect(status).toBe(404);
+  });
+});
+
+describe('Doctor & Setup', () => {
+  it('should return doctor diagnostics', async () => {
+    const { status, data, ok } = await api('/api/doctor');
+
+    expect(ok).toBe(true);
+    expect(status).toBe(200);
+    expect(data).toHaveProperty('status');
+    expect(data).toHaveProperty('checks');
+    expect(Array.isArray(data.checks)).toBe(true);
+  });
+
+  it('should run doctor fix', async () => {
+    const { status, data, ok } = await api('/api/doctor/fix', {
+      method: 'POST',
+    });
+
+    expect(ok).toBe(true);
+    expect(status).toBe(200);
+    expect(data).toHaveProperty('success', true);
+    expect(data).toHaveProperty('fixed');
+  });
+
+  it('should return setup status', async () => {
+    const { status, data, ok } = await api('/api/setup/status');
+
+    expect(ok).toBe(true);
+    expect(status).toBe(200);
+    expect(data).toHaveProperty('installed');
+    expect(data).toHaveProperty('ready');
+  });
+});
+
 describe('API Error Handling', () => {
 
   it('should return 404 for unknown endpoints', async () => {
