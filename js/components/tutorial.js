@@ -72,6 +72,23 @@ const TUTORIAL_STEPS = [
     highlight: '#agent-tree',
   },
   {
+    id: 'mayor-command',
+    title: 'Tell the Mayor What to Build',
+    content: `
+      <p>The <strong>Mayor Command Bar</strong> lets you give instructions directly to the Mayor agent.</p>
+      <p>Just type what you want built and the Mayor will:</p>
+      <ul>
+        <li><span class="material-icons">auto_awesome</span> Break down your request into tasks</li>
+        <li><span class="material-icons">group_work</span> Create a convoy to track the work</li>
+        <li><span class="material-icons">send</span> Sling tasks to available agents</li>
+        <li><span class="material-icons">visibility</span> Monitor progress and report back</li>
+      </ul>
+      <p><strong>Try it:</strong> Type something like "Create a README file" in the command bar!</p>
+    `,
+    action: null,
+    highlight: '#mayor-command-bar',
+  },
+  {
     id: 'sidebar',
     title: 'The Sidebar',
     content: `
