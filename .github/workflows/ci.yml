@@ -79,6 +79,6 @@ jobs:
         run: |
           timeout 5 node server.js &
           sleep 2
-          curl -f http://127.0.0.1:3000 || true
+          curl -f http://127.0.0.1:7667 || true
         env:
-          PORT: 3000
+          PORT: 7667

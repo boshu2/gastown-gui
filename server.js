@@ -28,7 +28,7 @@ const app = express();
 const server = createServer(app);
 const wss = new WebSocketServer({ server });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 7667;
 const HOST = process.env.HOST || '127.0.0.1';
 const HOME = process.env.HOME || require('os').homedir();
 const GT_ROOT = process.env.GT_ROOT || path.join(HOME, 'gt');

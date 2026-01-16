@@ -42,7 +42,7 @@ npm link
 gastown-gui start --open
 ```
 
-Opens `http://localhost:3000` in your browser.
+Opens `http://localhost:7667` in your browser.
 
 ### 4. Verify Setup
 
@@ -67,7 +67,7 @@ gastown-gui doctor
 ## CLI Usage
 
 ```bash
-# Start server (default port 3000)
+# Start server (default port 7667)
 gastown-gui
 
 # Custom port
@@ -93,7 +93,7 @@ gastown-gui help
 
 | Option | Description | Default |
 |--------|-------------|---------|
-| `--port, -p` | Server port | 3000 |
+| `--port, -p` | Server port | 7667 |
 | `--host, -h` | Server host | 127.0.0.1 |
 | `--open, -o` | Open browser | false |
 | `--dev` | Development mode | false |
@@ -102,7 +102,7 @@ gastown-gui help
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `PORT` | Server port | 3000 |
+| `PORT` | Server port | 7667 |
 | `HOST` | Server host | 127.0.0.1 |
 | `GT_ROOT` | Gas Town root directory | ~/gt |
 
