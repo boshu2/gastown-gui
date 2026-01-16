@@ -38,17 +38,17 @@ The GUI wraps the `gt` CLI commands as HTTP endpoints. Here's the full mapping:
 ### Polecat (Worker) Management
 | GUI Endpoint | gt Command | Tested | Notes |
 |--------------|------------|--------|-------|
-| `GET /api/polecat/:rig/:name/output` | (tmux capture) | ❌ | Get output |
-| `GET /api/polecat/:rig/:name/transcript` | (file read) | ❌ | Get transcript |
-| `POST /api/polecat/:rig/:name/start` | `gt polecat spawn` | ❌ | Start polecat |
-| `POST /api/polecat/:rig/:name/stop` | (tmux kill) | ❌ | Stop polecat |
-| `POST /api/polecat/:rig/:name/restart` | spawn after stop | ❌ | Restart |
+| `GET /api/polecat/:rig/:name/output` | (tmux capture) | ✅ | Get output |
+| `GET /api/polecat/:rig/:name/transcript` | (file read) | ✅ | Get transcript |
+| `POST /api/polecat/:rig/:name/start` | `gt polecat spawn` | ✅ | Start polecat |
+| `POST /api/polecat/:rig/:name/stop` | (tmux kill) | ✅ | Stop polecat |
+| `POST /api/polecat/:rig/:name/restart` | spawn after stop | ✅ | Restart |
 
 ### Mayor Operations
 | GUI Endpoint | gt Command | Tested | Notes |
 |--------------|------------|--------|-------|
-| `GET /api/mayor/output` | (tmux capture) | ❌ | Mayor output |
-| `GET /api/mayor/messages` | (internal state) | ❌ | Message history |
+| `GET /api/mayor/output` | (tmux capture) | ✅ | Mayor output |
+| `GET /api/mayor/messages` | (internal state) | ✅ | Message history |
 
 ### Rig (Project) Management
 | GUI Endpoint | gt Command | Tested | Notes |
@@ -92,10 +92,10 @@ The GUI wraps the `gt` CLI commands as HTTP endpoints. Here's the full mapping:
 ### Service Management
 | GUI Endpoint | gt Command | Tested | Notes |
 |--------------|------------|--------|-------|
-| `GET /api/service/:name/status` | (daemon status) | ❌ | Service status |
-| `POST /api/service/:name/up` | (daemon start) | ❌ | Start service |
-| `POST /api/service/:name/down` | (daemon stop) | ❌ | Stop service |
-| `POST /api/service/:name/restart` | (daemon restart) | ❌ | Restart |
+| `GET /api/service/:name/status` | (daemon status) | ✅ | Service status |
+| `POST /api/service/:name/up` | (daemon start) | ✅ | Start service |
+| `POST /api/service/:name/down` | (daemon stop) | ✅ | Stop service |
+| `POST /api/service/:name/restart` | (daemon restart) | ✅ | Restart |
 
 ### Hook Management
 | GUI Endpoint | gt Command | Tested | Notes |
@@ -111,23 +111,23 @@ The GUI wraps the `gt` CLI commands as HTTP endpoints. Here's the full mapping:
 | Core Status | 5 | 5 | 100% |
 | Convoy | 3 | 3 | 100% |
 | Agents | 5 | 5 | 100% |
-| Polecat | 0 | 5 | 0% |
-| Mayor | 0 | 2 | 0% |
+| Polecat | 5 | 5 | 100% |
+| Mayor | 2 | 2 | 100% |
 | Rigs | 3 | 3 | 100% |
 | Mail | 2 | 6 | 33% |
 | Beads | 2 | 9 | 22% |
 | Formulas | 1 | 5 | 20% |
-| Services | 0 | 4 | 0% |
+| Services | 4 | 4 | 100% |
 | Hook | 1 | 1 | 100% |
-| **TOTAL** | **22** | **48** | **46%** |
+| **TOTAL** | **33** | **48** | **69%** |
 
 ---
 
 ## Priority 1: Test Coverage (CRITICAL)
 
 ### Issue 1.1: Server Endpoint Tests
-**Status:** 🟡 PARTIAL (22/48 endpoints tested = 46%)
-**Impact:** HIGH - Many endpoints untested
+**Status:** 🟡 PARTIAL (33/48 endpoints tested = 69%)
+**Impact:** MEDIUM - Mail/beads/formulas need coverage
 
 **Test file:** `test/integration/endpoints.test.js`
 
@@ -141,13 +141,15 @@ The GUI wraps the `gt` CLI commands as HTTP endpoints. Here's the full mapping:
 - [x] `POST /api/escalate` - Escalation
 - [x] `GET /api/targets` - Sling targets
 
-**Phase 3 - Polecat/Mayor (TODO):**
-- [ ] All polecat endpoints (spawn, stop, output)
-- [ ] All mayor endpoints
+**Phase 3 - Polecat/Mayor (DONE):**
+- [x] All polecat endpoints (spawn, stop, restart, output, transcript)
+- [x] All mayor endpoints (output, messages)
+- [x] All service endpoints (status, up, down, restart)
 
 **Phase 4 - Mail/Beads (TODO):**
-- [ ] Full mail CRUD
-- [ ] Full beads CRUD
+- [ ] Full mail CRUD (4/6 remaining)
+- [ ] Full beads CRUD (7/9 remaining)
+- [ ] Formulas (4/5 remaining)
 
 ---
 
@@ -226,6 +228,7 @@ The GUI wraps the `gt` CLI commands as HTTP endpoints. Here's the full mapping:
 | 2026-01-17 | 1.3 | Added 10 cache tests | `17a24ae` |
 | 2026-01-17 | Docs | Added API coverage matrix | `0bfa364` |
 | 2026-01-17 | 1.1 | Added 19 more endpoint tests (39 total) | `549cc17` |
+| 2026-01-17 | 1.1 | Added polecat/mayor/service tests (53 total) | `908552d` |
 
 ---
 
@@ -234,7 +237,7 @@ The GUI wraps the `gt` CLI commands as HTTP endpoints. Here's the full mapping:
 1. ~~**Issue 1.2** - WebSocket tests~~ ✅ DONE
 2. ~~**Issue 1.3** - Cache tests~~ ✅ DONE
 3. ~~**Issue 1.1 Phase 2** - Test sling, rigs mutation, escalate~~ ✅ DONE
-4. **Issue 1.1 Phase 3** - Test polecat/mayor endpoints (0/7 done)
-5. **Issue 1.1 Phase 4** - Test mail/beads CRUD (4/15 done)
+4. ~~**Issue 1.1 Phase 3** - Test polecat/mayor/service endpoints~~ ✅ DONE
+5. **Issue 1.1 Phase 4** - Test mail/beads/formulas CRUD (15 remaining)
 6. **Issue 2.1** - Fix hardcoded repo references
 7. **Issue 3.x** - Add missing UI features
