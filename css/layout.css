@@ -44,6 +44,12 @@ body {
   font-size: var(--text-2xl);
 }
 
+.logo-icon-img {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+}
+
 .logo-text {
   font-family: var(--font-mono);
   letter-spacing: 2px;

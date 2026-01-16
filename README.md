@@ -2,7 +2,9 @@
 
 A standalone web GUI for [Gas Town](https://github.com/steveyegge/gastown) - the multi-agent orchestration system for Claude Code.
 
-![Gas Town GUI Screenshot](https://github.com/user-attachments/assets/87139c8a-bb39-4fc2-86ff-894b80fb79bf)
+![Gas Town GUI Screenshot](assets/screenshot.png)
+
+![Gas Town Loading Screen](assets/loading-background.jpeg)
 
 > **Note:** This is an independent companion project, not part of the official Gas Town repository. Originally submitted as [PR #212](https://github.com/steveyegge/gastown/pull/212), now maintained as a standalone package per Steve's recommendation.
 
