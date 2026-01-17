@@ -396,17 +396,21 @@ export const api = {
 
   // === K8s Wave 4: Logs, Metrics, Cross-Sling ===
 
-  // Get polecat logs
-  getK8sPolecatLogs(namespace, name, options = {}) {
+  // Get polecat logs (returns plain text, bypasses JSON wrapper)
+  async getK8sPolecatLogs(namespace, name, options = {}) {
     const params = new URLSearchParams();
     if (options.tailLines) params.set('tailLines', options.tailLines);
     if (options.timestamps === false) params.set('timestamps', 'false');
     if (options.previous) params.set('previous', 'true');
     if (options.sinceSeconds) params.set('sinceSeconds', options.sinceSeconds);
     const query = params.toString();
-    return this.request(`/api/k8s/polecats/${encodeURIComponent(namespace)}/${encodeURIComponent(name)}/logs${query ? '?' + query : ''}`, {
-      headers: { Accept: 'text/plain' },
-    }).then(res => res.text ? res.text() : res);
+    const url = `${API_BASE}/api/k8s/polecats/${encodeURIComponent(namespace)}/${encodeURIComponent(name)}/logs${query ? '?' + query : ''}`;
+    const response = await fetch(url, { headers: { Accept: 'text/plain' } });
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || 'Failed to fetch logs');
+    }
+    return response.text();
   },
 
   // Get aggregated K8s metrics
