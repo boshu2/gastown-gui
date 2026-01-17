@@ -2537,6 +2537,140 @@ app.get('/api/k8s/convoys/:namespace/:name', async (req, res) => {
   }
 });
 
+// ============= K8s Write Operations (Wave 3) =============
+
+// Create K8s Polecat/Automaton
+app.post('/api/k8s/polecats', async (req, res) => {
+  try {
+    const { namespace, name, objective, sdk, limits, forgeRef, labels } = req.body;
+
+    // Validate required fields
+    if (!objective) {
+      return res.status(400).json({ error: 'objective is required' });
+    }
+    if (!name) {
+      return res.status(400).json({ error: 'name is required' });
+    }
+
+    // Validate name is DNS-compliant
+    const dnsRegex = /^[a-z0-9]([-a-z0-9]*[a-z0-9])?$/;
+    if (!dnsRegex.test(name)) {
+      return res.status(400).json({
+        error: 'name must be DNS-compliant (lowercase alphanumeric, may contain hyphens)',
+      });
+    }
+
+    const polecat = await k8sClient.createPolecat({
+      namespace,
+      name,
+      objective,
+      sdk,
+      limits,
+      forgeRef,
+      labels,
+    });
+
+    res.status(201).json(polecat);
+  } catch (err) {
+    if (err.statusCode === 409) {
+      return res.status(409).json({ error: 'Polecat already exists' });
+    }
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Delete K8s Polecat/Automaton
+app.delete('/api/k8s/polecats/:namespace/:name', async (req, res) => {
+  try {
+    const { namespace, name } = req.params;
+    const { graceful } = req.query;
+
+    const result = await k8sClient.deletePolecat(name, namespace, graceful === 'true');
+    res.json(result);
+  } catch (err) {
+    if (err.statusCode === 404) {
+      return res.status(404).json({ error: 'Polecat not found' });
+    }
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Create K8s Convoy
+app.post('/api/k8s/convoys', async (req, res) => {
+  try {
+    const { namespace, name, title, selector, labels } = req.body;
+
+    // Validate required fields
+    if (!name) {
+      return res.status(400).json({ error: 'name is required' });
+    }
+    if (!title) {
+      return res.status(400).json({ error: 'title is required' });
+    }
+
+    // Validate name is DNS-compliant
+    const dnsRegex = /^[a-z0-9]([-a-z0-9]*[a-z0-9])?$/;
+    if (!dnsRegex.test(name)) {
+      return res.status(400).json({
+        error: 'name must be DNS-compliant (lowercase alphanumeric, may contain hyphens)',
+      });
+    }
+
+    const convoy = await k8sClient.createConvoy({
+      namespace,
+      name,
+      title,
+      selector,
+      labels,
+    });
+
+    res.status(201).json(convoy);
+  } catch (err) {
+    if (err.statusCode === 409) {
+      return res.status(409).json({ error: 'Convoy already exists' });
+    }
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Delete K8s Convoy
+app.delete('/api/k8s/convoys/:namespace/:name', async (req, res) => {
+  try {
+    const { namespace, name } = req.params;
+
+    const result = await k8sClient.deleteConvoy(name, namespace);
+    res.json(result);
+  } catch (err) {
+    if (err.statusCode === 404) {
+      return res.status(404).json({ error: 'Convoy not found' });
+    }
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Preview convoy members (which polecats match a selector)
+app.post('/api/k8s/convoys/preview', async (req, res) => {
+  try {
+    const { namespace, selector } = req.body;
+
+    const matches = await k8sClient.previewConvoyMembers(selector, namespace);
+    res.json({ items: matches, count: matches.length });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// List available Forges/Rigs
+app.get('/api/k8s/forges', async (req, res) => {
+  try {
+    const { namespace } = req.query;
+    const forges = await k8sClient.listForges(namespace);
+    res.json({ items: forges });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ============= WebSocket for Real-time Events =============
 
 // Start activity stream

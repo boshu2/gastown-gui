@@ -10,6 +10,7 @@ import { AGENT_TYPES, STATUS_COLORS } from '../shared/agent-types.js';
 import { api } from '../api.js';
 import { showToast } from './toast.js';
 import { escapeHtml } from '../utils/html.js';
+import { showDeletePolecatModal, showCreatePolecatModal } from './k8s-modals.js';
 
 // Source configuration
 const SOURCE_CONFIG = {
@@ -212,18 +213,24 @@ export function renderCombinedWorkerView(container, workers) {
           ${k8sCount}
         </span>
       </div>
-      <div class="source-filter-group">
-        <button class="source-filter-btn ${currentSourceFilter === 'all' ? 'active' : ''}" data-filter="all">
-          All
+      <div class="header-actions">
+        <button class="btn btn-primary btn-sm" id="create-k8s-automaton-btn" title="Create K8s Automaton">
+          <span class="material-icons">add</span>
+          Create Automaton
         </button>
-        <button class="source-filter-btn ${currentSourceFilter === 'local' ? 'active' : ''}" data-filter="local">
-          <span class="material-icons">terminal</span>
-          Local
-        </button>
-        <button class="source-filter-btn ${currentSourceFilter === 'k8s' ? 'active' : ''}" data-filter="k8s">
-          <span class="material-icons">cloud</span>
-          K8s
-        </button>
+        <div class="source-filter-group">
+          <button class="source-filter-btn ${currentSourceFilter === 'all' ? 'active' : ''}" data-filter="all">
+            All
+          </button>
+          <button class="source-filter-btn ${currentSourceFilter === 'local' ? 'active' : ''}" data-filter="local">
+            <span class="material-icons">terminal</span>
+            Local
+          </button>
+          <button class="source-filter-btn ${currentSourceFilter === 'k8s' ? 'active' : ''}" data-filter="k8s">
+            <span class="material-icons">cloud</span>
+            K8s
+          </button>
+        </div>
       </div>
     </div>
     <div class="combined-worker-cards">
@@ -242,6 +249,14 @@ export function renderCombinedWorkerView(container, workers) {
 
   // Add card action listeners
   setupCardActions(container);
+
+  // Add create automaton button listener
+  const createBtn = container.querySelector('#create-k8s-automaton-btn');
+  if (createBtn) {
+    createBtn.addEventListener('click', () => {
+      showCreatePolecatModal();
+    });
+  }
 }
 
 /**
@@ -366,6 +381,9 @@ function renderWorkerCard(worker, index) {
             <span class="material-icons">terminal</span>
             Logs
           </button>
+          <button class="btn btn-sm btn-danger-ghost" data-action="delete" data-worker="${escapeHtml(worker.id)}" title="Delete automaton">
+            <span class="material-icons">delete</span>
+          </button>
         `}
         <button class="btn btn-sm btn-secondary" data-action="details" data-worker="${escapeHtml(worker.id)}" title="View details">
           <span class="material-icons">info</span>
@@ -435,6 +453,22 @@ function setupCardActions(container) {
       e.stopPropagation();
       const workerId = btn.dataset.worker;
       await handleWorkerStop(workerId, btn);
+    });
+  });
+
+  // Delete button (K8s only)
+  container.querySelectorAll('[data-action="delete"]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const workerId = btn.dataset.worker;
+      const worker = workersCache.find(w => w.id === workerId);
+      if (worker && worker.source === 'k8s') {
+        showDeletePolecatModal({
+          name: worker.name,
+          namespace: worker.namespace,
+          phase: worker.status,
+        });
+      }
     });
   });
 }

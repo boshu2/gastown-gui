@@ -319,6 +319,80 @@ export const api = {
     const query = params.toString();
     return this.get(`/api/github/repos${query ? '?' + query : ''}`);
   },
+
+  // === K8s Integration (Wave 3) ===
+
+  // K8s Health & Configuration
+  getK8sHealth() {
+    return this.get('/api/k8s/health');
+  },
+
+  getK8sContexts() {
+    return this.get('/api/k8s/contexts');
+  },
+
+  setK8sContext(context) {
+    return this.post('/api/k8s/context', { context });
+  },
+
+  getK8sNamespaces() {
+    return this.get('/api/k8s/namespaces');
+  },
+
+  setK8sNamespace(namespace) {
+    return this.post('/api/k8s/namespace', { namespace });
+  },
+
+  // K8s Polecats
+  getK8sPolecats(namespace) {
+    const query = namespace ? `?namespace=${encodeURIComponent(namespace)}` : '';
+    return this.get(`/api/k8s/polecats${query}`);
+  },
+
+  getK8sPolecat(namespace, name) {
+    return this.get(`/api/k8s/polecats/${encodeURIComponent(namespace)}/${encodeURIComponent(name)}`);
+  },
+
+  createK8sPolecat(spec) {
+    return this.post('/api/k8s/polecats', spec);
+  },
+
+  deleteK8sPolecat(namespace, name, graceful = false) {
+    const query = graceful ? '?graceful=true' : '';
+    return this.request(`/api/k8s/polecats/${encodeURIComponent(namespace)}/${encodeURIComponent(name)}${query}`, {
+      method: 'DELETE',
+    });
+  },
+
+  // K8s Convoys
+  getK8sConvoys(namespace) {
+    const query = namespace ? `?namespace=${encodeURIComponent(namespace)}` : '';
+    return this.get(`/api/k8s/convoys${query}`);
+  },
+
+  getK8sConvoy(namespace, name) {
+    return this.get(`/api/k8s/convoys/${encodeURIComponent(namespace)}/${encodeURIComponent(name)}`);
+  },
+
+  createK8sConvoy(spec) {
+    return this.post('/api/k8s/convoys', spec);
+  },
+
+  deleteK8sConvoy(namespace, name) {
+    return this.request(`/api/k8s/convoys/${encodeURIComponent(namespace)}/${encodeURIComponent(name)}`, {
+      method: 'DELETE',
+    });
+  },
+
+  previewK8sConvoyMembers(selector, namespace) {
+    return this.post('/api/k8s/convoys/preview', { selector, namespace });
+  },
+
+  // K8s Forges/Rigs
+  getK8sForges(namespace) {
+    const query = namespace ? `?namespace=${encodeURIComponent(namespace)}` : '';
+    return this.get(`/api/k8s/forges${query}`);
+  },
 };
 
 // WebSocket Client

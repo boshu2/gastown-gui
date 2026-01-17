@@ -8901,3 +8901,199 @@ a:focus-visible,
 .btn-danger-ghost:hover {
   background: rgba(239, 68, 68, 0.1);
 }
+
+/* ============================================
+   Wave 3: K8s Create/Delete Modals
+   ============================================ */
+
+/* Header actions container */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.k8s-convoy-header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+/* Form row for side-by-side fields */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-md);
+}
+
+@media (max-width: 600px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Form details (collapsible sections) */
+.form-details {
+  margin: var(--space-md) 0;
+  padding: var(--space-md);
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-md);
+}
+
+.form-details summary {
+  cursor: pointer;
+  font-weight: 500;
+  color: var(--text-secondary);
+  user-select: none;
+}
+
+.form-details summary:hover {
+  color: var(--text-primary);
+}
+
+.form-details[open] summary {
+  margin-bottom: var(--space-md);
+}
+
+/* Required field indicator */
+.required {
+  color: #ef4444;
+}
+
+/* Warning messages in modals */
+.warning-message {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-lg);
+}
+
+.warning-message .material-icons {
+  color: #3b82f6;
+  flex-shrink: 0;
+}
+
+.warning-message.warning-danger {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.warning-message.warning-danger .material-icons {
+  color: #ef4444;
+}
+
+/* Label selector rows */
+.selector-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-sm);
+}
+
+.selector-row {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: center;
+}
+
+.selector-row input {
+  flex: 1;
+}
+
+.selector-row .btn {
+  flex-shrink: 0;
+}
+
+.remove-selector:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.add-selector {
+  align-self: flex-start;
+}
+
+/* Convoy preview */
+.convoy-preview {
+  padding: var(--space-md);
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-md);
+  min-height: 80px;
+}
+
+.preview-count {
+  font-weight: 500;
+  margin-bottom: var(--space-sm);
+  color: var(--text-primary);
+}
+
+.preview-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.preview-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-xs) 0;
+  border-bottom: 1px solid var(--border-default);
+}
+
+.preview-list li:last-child {
+  border-bottom: none;
+}
+
+.preview-name {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+}
+
+/* Text utilities */
+.text-muted {
+  color: var(--text-muted);
+}
+
+.text-error {
+  color: #ef4444;
+}
+
+/* Checkbox label */
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  cursor: pointer;
+  user-select: none;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: auto;
+  margin: 0;
+}
+
+/* Delete button styling (ensure danger style) */
+.btn-danger {
+  background: #ef4444;
+  color: white;
+  border: none;
+}
+
+.btn-danger:hover {
+  background: #dc2626;
+}
+
+/* Spinning animation for loading states */
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

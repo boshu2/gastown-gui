@@ -308,6 +308,216 @@ export function setNamespace(namespace) {
   return getStatus();
 }
 
+/**
+ * Create a Polecat/Automaton in K8s
+ * @param {Object} spec - Polecat specification
+ * @param {string} spec.namespace - Target namespace
+ * @param {string} spec.name - Resource name (DNS-compliant)
+ * @param {string} spec.objective - Work objective
+ * @param {Object} spec.sdk - SDK configuration
+ * @param {Object} spec.limits - Execution limits
+ * @param {string} spec.forgeRef - Reference to Forge/Rig
+ */
+export async function createPolecat(spec) {
+  if (!customApi) throw new Error('Client not initialized');
+
+  const namespace = spec.namespace || connectionStatus.namespace;
+  const body = {
+    apiVersion: `${CRD_GROUP}/${CRD_VERSION}`,
+    kind: 'Polecat',
+    metadata: {
+      name: spec.name,
+      namespace,
+      labels: spec.labels || {},
+    },
+    spec: {
+      objective: spec.objective,
+      sdk: spec.sdk || {
+        type: 'claude',
+        modelConfig: { model: 'claude-sonnet-4' },
+      },
+      limits: spec.limits || {
+        maxDuration: '1h',
+        maxIterations: 50,
+      },
+      forgeRef: spec.forgeRef,
+    },
+  };
+
+  const res = await customApi.createNamespacedCustomObject({
+    group: CRD_GROUP,
+    version: CRD_VERSION,
+    namespace,
+    plural: 'polecats',
+    body,
+  });
+
+  return normalizePolecat(res);
+}
+
+/**
+ * Delete a Polecat/Automaton from K8s
+ * @param {string} name - Polecat name
+ * @param {string} namespace - Namespace (optional, uses default)
+ * @param {boolean} graceful - If true, sets phase to Failed before delete
+ */
+export async function deletePolecat(name, namespace = connectionStatus.namespace, graceful = false) {
+  if (!customApi) throw new Error('Client not initialized');
+
+  if (graceful) {
+    // First check if running, and if so, patch to Failed
+    try {
+      const polecat = await getPolecat(name, namespace);
+      if (polecat.phase === 'Running' || polecat.phase === 'Claimed') {
+        await customApi.patchNamespacedCustomObject({
+          group: CRD_GROUP,
+          version: CRD_VERSION,
+          namespace,
+          plural: 'polecats',
+          name,
+          body: {
+            spec: {
+              desiredState: 'Terminated',
+            },
+          },
+        }, {
+          headers: { 'Content-Type': 'application/merge-patch+json' },
+        });
+        // Wait briefly for controller to process
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+    } catch (err) {
+      // Continue with deletion even if patch fails
+      console.warn('[k8s] Graceful shutdown patch failed:', err.message);
+    }
+  }
+
+  await customApi.deleteNamespacedCustomObject({
+    group: CRD_GROUP,
+    version: CRD_VERSION,
+    namespace,
+    plural: 'polecats',
+    name,
+  });
+
+  return { deleted: true, name, namespace };
+}
+
+/**
+ * Create a Convoy in K8s
+ * @param {Object} spec - Convoy specification
+ * @param {string} spec.namespace - Target namespace
+ * @param {string} spec.name - Resource name
+ * @param {string} spec.title - Display title
+ * @param {Object} spec.selector - Label selector for matching Polecats
+ */
+export async function createConvoy(spec) {
+  if (!customApi) throw new Error('Client not initialized');
+
+  const namespace = spec.namespace || connectionStatus.namespace;
+  const body = {
+    apiVersion: `${CRD_GROUP}/${CRD_VERSION}`,
+    kind: 'Convoy',
+    metadata: {
+      name: spec.name,
+      namespace,
+      labels: spec.labels || {},
+    },
+    spec: {
+      title: spec.title,
+      selector: spec.selector || {},
+    },
+  };
+
+  const res = await customApi.createNamespacedCustomObject({
+    group: CRD_GROUP,
+    version: CRD_VERSION,
+    namespace,
+    plural: 'convoys',
+    body,
+  });
+
+  return normalizeConvoy(res);
+}
+
+/**
+ * Delete a Convoy from K8s
+ * @param {string} name - Convoy name
+ * @param {string} namespace - Namespace (optional, uses default)
+ */
+export async function deleteConvoy(name, namespace = connectionStatus.namespace) {
+  if (!customApi) throw new Error('Client not initialized');
+
+  await customApi.deleteNamespacedCustomObject({
+    group: CRD_GROUP,
+    version: CRD_VERSION,
+    namespace,
+    plural: 'convoys',
+    name,
+  });
+
+  return { deleted: true, name, namespace };
+}
+
+/**
+ * Preview which Polecats match a selector
+ * @param {Object} selector - Label selector
+ * @param {string} namespace - Namespace to search
+ */
+export async function previewConvoyMembers(selector, namespace = connectionStatus.namespace) {
+  if (!customApi) throw new Error('Client not initialized');
+
+  const polecats = await listPolecats(namespace);
+  const matchLabels = selector?.matchLabels || {};
+
+  return polecats.filter(p => {
+    const labels = p.labels || {};
+    return Object.entries(matchLabels).every(([key, value]) => labels[key] === value);
+  });
+}
+
+/**
+ * List available Forges/Rigs
+ */
+export async function listForges(namespace = connectionStatus.namespace) {
+  if (!customApi) throw new Error('Client not initialized');
+
+  try {
+    const res = await customApi.listNamespacedCustomObject({
+      group: CRD_GROUP,
+      version: CRD_VERSION,
+      namespace,
+      plural: 'rigs',
+    });
+
+    return res.items.map(rig => ({
+      name: rig.metadata.name,
+      namespace: rig.metadata.namespace,
+      gitURL: rig.spec?.gitURL,
+      status: rig.status?.phase || 'Unknown',
+    }));
+  } catch (err) {
+    // Rigs might be cluster-scoped, try that
+    try {
+      const res = await customApi.listClusterCustomObject({
+        group: CRD_GROUP,
+        version: CRD_VERSION,
+        plural: 'rigs',
+      });
+
+      return res.items.map(rig => ({
+        name: rig.metadata.name,
+        namespace: null,
+        gitURL: rig.spec?.gitURL,
+        status: rig.status?.phase || 'Unknown',
+      }));
+    } catch (clusterErr) {
+      console.warn('[k8s] Could not list rigs:', clusterErr.message);
+      return [];
+    }
+  }
+}
+
 export default {
   initClient,
   getStatus,
@@ -322,4 +532,11 @@ export default {
   getContexts,
   setContext,
   setNamespace,
+  // Wave 3: Create/Delete operations
+  createPolecat,
+  deletePolecat,
+  createConvoy,
+  deleteConvoy,
+  previewConvoyMembers,
+  listForges,
 };

@@ -9,6 +9,7 @@ import { AGENT_TYPES } from '../shared/agent-types.js';
 import { api } from '../api.js';
 import { showToast } from './toast.js';
 import { escapeHtml } from '../utils/html.js';
+import { showCreateConvoyModal, showDeleteConvoyModal } from './k8s-modals.js';
 
 // Phase configuration for Convoy
 const PHASE_CONFIG = {
@@ -50,7 +51,11 @@ export function renderK8sConvoyList(container, convoys) {
         <span class="material-icons">local_shipping</span>
         <span>${convoys.length} Convoy${convoys.length !== 1 ? 's' : ''}</span>
       </div>
-      <div class="k8s-convoy-filters">
+      <div class="k8s-convoy-header-actions">
+        <button class="btn btn-primary btn-sm" id="create-k8s-convoy-btn" title="Create K8s Convoy">
+          <span class="material-icons">add</span>
+          Create Convoy
+        </button>
         <select id="k8s-convoy-phase-filter" class="filter-select">
           <option value="">All Phases</option>
           <option value="Running">Running</option>
@@ -197,6 +202,9 @@ function renderConvoyCard(convoy, index) {
         <button class="btn btn-sm btn-secondary" data-action="refresh" data-convoy="${escapeHtml(convoy.id)}" title="Refresh">
           <span class="material-icons">refresh</span>
         </button>
+        <button class="btn btn-sm btn-danger-ghost" data-action="delete" data-convoy="${escapeHtml(convoy.id)}" title="Delete convoy">
+          <span class="material-icons">delete</span>
+        </button>
       </div>
     </div>
   `;
@@ -234,6 +242,14 @@ function formatSelector(selector) {
  * Set up event listeners for convoy actions
  */
 function setupConvoyActions(container) {
+  // Create convoy button
+  const createBtn = container.querySelector('#create-k8s-convoy-btn');
+  if (createBtn) {
+    createBtn.addEventListener('click', () => {
+      showCreateConvoyModal();
+    });
+  }
+
   // Details button
   container.querySelectorAll('[data-action="details"]').forEach(btn => {
     btn.addEventListener('click', (e) => {
@@ -249,6 +265,21 @@ function setupConvoyActions(container) {
       e.stopPropagation();
       const convoyId = btn.dataset.convoy;
       refreshConvoy(convoyId, btn);
+    });
+  });
+
+  // Delete button
+  container.querySelectorAll('[data-action="delete"]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const convoyId = btn.dataset.convoy;
+      const convoy = convoysCache.find(c => c.id === convoyId);
+      if (convoy) {
+        showDeleteConvoyModal({
+          name: convoy.name,
+          namespace: convoy.namespace,
+        });
+      }
     });
   });
 }
