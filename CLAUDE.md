@@ -16,24 +16,63 @@ npm run test:e2e   # E2E tests only
 
 ```
 gastown-gui/
-├── server.js           # Express server + all API endpoints (~1400 lines)
+├── server.js              # Express server + 61 API endpoints wrapping gt CLI
+├── index.html             # Main HTML entry point
+├── package.json           # Dependencies & npm scripts
+├── bin/
+│   └── cli.js             # CLI entry: npx gastown-gui --port 4000
 ├── js/
-│   ├── api.js          # Frontend API client
-│   ├── app.js          # Main app initialization
-│   ├── state.js        # Global state management
-│   ├── components/     # UI components (18 files)
-│   │   ├── agent-grid.js
-│   │   ├── rig-list.js
-│   │   ├── crew-list.js
-│   │   ├── mail-list.js
-│   │   └── ...
-│   ├── shared/         # Shared utilities
-│   └── utils/          # Helper functions
+│   ├── api.js             # Frontend HTTP client for /api/* endpoints
+│   ├── app.js             # App init, routing, event wiring
+│   ├── state.js           # Global reactive state store
+│   ├── components/
+│   │   ├── activity-feed.js   # Real-time event stream display
+│   │   ├── agent-grid.js      # Agent cards with status/actions
+│   │   ├── autocomplete.js    # Search input with suggestions
+│   │   ├── convoy-list.js     # Convoy management panel
+│   │   ├── crew-list.js       # Crew CRUD operations
+│   │   ├── dashboard.js       # Main dashboard layout
+│   │   ├── formula-list.js    # Formula editor/executor
+│   │   ├── health-check.js    # System health display
+│   │   ├── issue-list.js      # Beads/issues list
+│   │   ├── mail-list.js       # Mail inbox/compose
+│   │   ├── modals.js          # Modal dialogs (sling, nudge, etc.)
+│   │   ├── onboarding.js      # First-run setup wizard
+│   │   ├── pr-list.js         # GitHub PR list
+│   │   ├── rig-list.js        # Rig management + polecat spawn/stop
+│   │   ├── sidebar.js         # Navigation sidebar
+│   │   ├── toast.js           # Toast notifications
+│   │   ├── tutorial.js        # Interactive tutorial
+│   │   └── work-list.js       # Work items display
+│   ├── shared/
+│   │   ├── agent-types.js     # Agent type definitions & colors
+│   │   └── events.js          # Custom event bus
+│   └── utils/
+│       ├── formatting.js      # Date/number formatters
+│       ├── html.js            # HTML escape/template helpers
+│       ├── performance.js     # Debounce/throttle utilities
+│       └── tooltip.js         # Tooltip positioning
+├── css/
+│   ├── variables.css      # CSS custom properties (colors, spacing)
+│   ├── reset.css          # Browser reset styles
+│   ├── layout.css         # Grid/flex layouts
+│   ├── components.css     # Component-specific styles
+│   └── animations.css     # Transitions & keyframes
 ├── test/
-│   ├── unit/           # Unit tests (53)
-│   ├── integration/    # Integration tests (129)
-│   └── e2e.test.js     # E2E tests (24)
-└── public/             # Static assets (CSS, icons)
+│   ├── setup.js           # Test environment setup
+│   ├── globalSetup.js     # Vitest global setup
+│   ├── mock-server.js     # Mock gt CLI responses
+│   ├── e2e.test.js        # Puppeteer browser tests (24)
+│   ├── integration.test.js # Legacy integration tests
+│   ├── unit/
+│   │   ├── state.test.js      # State management tests (53)
+│   │   └── quoteArg.test.js   # Shell injection security tests (22)
+│   └── integration/
+│       ├── endpoints.test.js  # API endpoint tests (78)
+│       ├── websocket.test.js  # WebSocket lifecycle tests (9)
+│       └── cache.test.js      # Cache invalidation tests (10)
+├── vitest.config.js       # Main test config
+└── vitest.unit.config.js  # Unit-only test config
 ```
 
 ## Key Patterns
