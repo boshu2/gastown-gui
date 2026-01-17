@@ -164,9 +164,9 @@ export function initModals() {
     onOpen: initPeekModal,
   });
 
-  // Generic dynamic modal handler
+  // Generic dynamic modal handler (event-driven)
   document.addEventListener('modal:show', (e) => {
-    showDynamicModal(e.detail);
+    showEventDrivenModal(e.detail);
   });
 
   document.addEventListener('modal:close', () => {
@@ -178,9 +178,10 @@ export function initModals() {
 let dynamicModal = null;
 
 /**
- * Show a dynamic modal with custom content
+ * Show a dynamic modal with custom content (event-driven version)
+ * Used by the modal:show custom event
  */
-function showDynamicModal(options) {
+function showEventDrivenModal(options) {
   const { title, content, onMount } = options;
 
   // Create dynamic modal if it doesn't exist
