@@ -31,6 +31,17 @@ const packageRoot = path.resolve(__dirname, '..');
 
 // Parse arguments
 const args = process.argv.slice(2);
+
+// Check for help/version flags first (before command parsing)
+if (args.includes('--help') || args.includes('-h')) {
+  showHelp();
+  process.exit(0);
+}
+if (args.includes('--version') || args.includes('-v')) {
+  showVersion();
+  process.exit(0);
+}
+
 const command = args.find(a => !a.startsWith('-')) || 'start';
 const options = {
   port: getOption(['--port', '-p']) || process.env.PORT || '7667',
