@@ -19,6 +19,7 @@ import os from 'os';
 import readline from 'readline';
 import { fileURLToPath } from 'url';
 import cors from 'cors';
+import * as k8sClient from './js/k8s/client.js';
 
 const execFileAsync = promisify(execFile);
 const __filename = fileURLToPath(import.meta.url);
@@ -2387,6 +2388,151 @@ app.get('/api/github/repos', async (req, res) => {
     res.json(repos);
   } catch (err) {
     console.error('[GitHub] Error listing repos:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ============= Kubernetes Integration =============
+
+// Initialize K8s client on startup (non-blocking)
+let k8sInitialized = false;
+(async () => {
+  try {
+    const status = k8sClient.initClient({
+      namespace: process.env.K8S_NAMESPACE || 'default',
+    });
+    k8sInitialized = status.connected;
+    console.log('[K8s] Client initialized:', status.mode, status.connected ? '(connected)' : '(not connected)');
+  } catch (err) {
+    console.log('[K8s] Client initialization skipped:', err.message);
+  }
+})();
+
+// K8s health check
+app.get('/api/k8s/health', async (req, res) => {
+  try {
+    const status = k8sClient.getStatus();
+    if (!status.connected) {
+      return res.json({
+        ok: false,
+        status,
+        message: 'K8s client not connected',
+      });
+    }
+
+    const testResult = await k8sClient.testConnection();
+    res.json({
+      ok: testResult.ok,
+      status: k8sClient.getStatus(),
+      error: testResult.error,
+    });
+  } catch (err) {
+    res.json({
+      ok: false,
+      error: err.message,
+      status: k8sClient.getStatus(),
+    });
+  }
+});
+
+// List available K8s contexts
+app.get('/api/k8s/contexts', (req, res) => {
+  try {
+    const contexts = k8sClient.getContexts();
+    const status = k8sClient.getStatus();
+    res.json({
+      contexts,
+      current: status.context,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Switch K8s context
+app.post('/api/k8s/context', (req, res) => {
+  try {
+    const { context } = req.body;
+    if (!context) {
+      return res.status(400).json({ error: 'context is required' });
+    }
+    const status = k8sClient.setContext(context);
+    res.json(status);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// List namespaces
+app.get('/api/k8s/namespaces', async (req, res) => {
+  try {
+    const namespaces = await k8sClient.listNamespaces();
+    res.json({ namespaces });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Set default namespace
+app.post('/api/k8s/namespace', (req, res) => {
+  try {
+    const { namespace } = req.body;
+    if (!namespace) {
+      return res.status(400).json({ error: 'namespace is required' });
+    }
+    const status = k8sClient.setNamespace(namespace);
+    res.json(status);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// List Automatons
+app.get('/api/k8s/automatons', async (req, res) => {
+  try {
+    const { namespace } = req.query;
+    const automatons = await k8sClient.listAutomatons(namespace);
+    res.json({ items: automatons });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Get specific Automaton
+app.get('/api/k8s/automatons/:namespace/:name', async (req, res) => {
+  try {
+    const { namespace, name } = req.params;
+    const automaton = await k8sClient.getAutomaton(name, namespace);
+    res.json(automaton);
+  } catch (err) {
+    if (err.statusCode === 404) {
+      return res.status(404).json({ error: 'Automaton not found' });
+    }
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// List K8s Convoys
+app.get('/api/k8s/convoys', async (req, res) => {
+  try {
+    const { namespace } = req.query;
+    const convoys = await k8sClient.listConvoys(namespace);
+    res.json({ items: convoys });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Get specific K8s Convoy
+app.get('/api/k8s/convoys/:namespace/:name', async (req, res) => {
+  try {
+    const { namespace, name } = req.params;
+    const convoy = await k8sClient.getConvoy(name, namespace);
+    res.json(convoy);
+  } catch (err) {
+    if (err.statusCode === 404) {
+      return res.status(404).json({ error: 'Convoy not found' });
+    }
     res.status(500).json({ error: err.message });
   }
 });
