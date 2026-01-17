@@ -75,6 +75,10 @@
             <span class="material-icons">folder_special</span>
             Rigs
           </button>
+          <button class="nav-tab" data-view="crews" data-tooltip="Teams of polecats for coordinated work.">
+            <span class="material-icons">groups</span>
+            Crews
+          </button>
           <button class="nav-tab" data-view="prs" data-tooltip="GitHub Pull Requests across all connected repositories.">
             <span class="material-icons">merge_type</span>
             PRs
@@ -237,6 +241,25 @@
             </div>
           </div>
           <div class="rig-list" id="rig-list">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- Crews View -->
+        <div class="view" id="view-crews">
+          <div class="view-header">
+            <h1>Crews</h1>
+            <div class="view-actions">
+              <button class="btn btn-sm btn-icon" id="crew-refresh" title="Refresh">
+                <span class="material-icons">refresh</span>
+              </button>
+              <button class="btn btn-primary" id="new-crew-btn">
+                <span class="material-icons">group_add</span>
+                New Crew
+              </button>
+            </div>
+          </div>
+          <div class="crew-list" id="crew-list-container">
             <!-- Populated by JS -->
           </div>
         </div>

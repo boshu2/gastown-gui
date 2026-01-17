@@ -14,6 +14,7 @@ import { renderActivityFeed } from './components/activity-feed.js';
 import { renderWorkList } from './components/work-list.js';
 import { renderMailList } from './components/mail-list.js';
 import { renderRigList } from './components/rig-list.js';
+import { renderCrewList, loadCrews, showNewCrewModal } from './components/crew-list.js';
 import { initPRList, loadPRs } from './components/pr-list.js';
 import { initFormulaList, loadFormulas } from './components/formula-list.js';
 import { initIssueList, loadIssues } from './components/issue-list.js';
@@ -225,6 +226,8 @@ function switchView(viewId) {
     loadWork();
   } else if (viewId === 'rigs') {
     loadRigs();
+  } else if (viewId === 'crews') {
+    loadCrews();
   } else if (viewId === 'prs') {
     loadPRs();
   } else if (viewId === 'formulas') {
@@ -941,6 +944,21 @@ function setupThemeToggle() {
 document.getElementById('refresh-btn').addEventListener('click', () => {
   loadInitialData();
   showToast('Refreshing...', 'info', 1000);
+});
+
+// Crew management buttons
+document.getElementById('new-crew-btn')?.addEventListener('click', () => {
+  showNewCrewModal();
+});
+
+document.getElementById('crew-refresh')?.addEventListener('click', () => {
+  loadCrews();
+  showToast('Refreshing crews...', 'info', 1000);
+});
+
+// Crew refresh event (triggered by crew-list.js after add/remove)
+document.addEventListener('crew:refresh', () => {
+  loadCrews();
 });
 
 // Mayor command bar

@@ -775,6 +775,195 @@ select {
   border-top: 1px solid var(--border-default);
 }
 
+/* === Crew Card === */
+.crew-list {
+  padding: var(--space-lg);
+}
+
+.crew-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: var(--space-lg);
+}
+
+.crew-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  transition: all var(--transition-fast);
+}
+
+.crew-card:hover {
+  border-color: var(--border-accent);
+}
+
+.crew-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+.crew-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-md);
+}
+
+.crew-icon .material-icons {
+  font-size: 24px;
+  color: var(--accent-secondary);
+}
+
+.crew-info {
+  flex: 1;
+}
+
+.crew-name {
+  font-size: var(--text-lg);
+  font-weight: 600;
+  margin-bottom: var(--space-xxs);
+}
+
+.crew-meta {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+.crew-rig {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xxs);
+}
+
+.crew-rig .material-icons {
+  font-size: 14px;
+}
+
+.crew-no-rig {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.crew-status {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: var(--text-sm);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  background: var(--bg-tertiary);
+}
+
+.crew-status.status-active {
+  color: #22c55e;
+}
+
+.crew-status.status-active .material-icons {
+  color: #22c55e;
+}
+
+.crew-status.status-inactive {
+  color: var(--text-muted);
+}
+
+.crew-stats {
+  display: flex;
+  gap: var(--space-lg);
+  padding: var(--space-md);
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-md);
+}
+
+.crew-stat {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.crew-stat .material-icons {
+  font-size: 20px;
+  color: var(--text-secondary);
+}
+
+.crew-stat .stat-value {
+  font-size: var(--text-lg);
+  font-weight: 600;
+}
+
+.crew-stat .stat-label {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+.crew-members {
+  margin-bottom: var(--space-md);
+}
+
+.crew-members h4 {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: var(--space-sm);
+}
+
+.member-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+.member-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xxs);
+  padding: var(--space-xxs) var(--space-sm);
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+}
+
+.member-badge .material-icons {
+  font-size: 14px;
+  color: var(--accent-primary);
+}
+
+.crew-actions {
+  display: flex;
+  gap: var(--space-sm);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--border-default);
+}
+
+.crew-status-details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.crew-status-details .detail-row {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--space-sm);
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-sm);
+}
+
+.crew-status-details .label {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.crew-status-details .value {
+  font-weight: 600;
+}
+
 /* === Mail Item === */
 .mail-item {
   display: flex;
