@@ -120,6 +120,9 @@ async function init() {
   // Load initial data
   await loadInitialData();
 
+  // Check K8s connection status
+  updateK8sStatus();
+
   console.log('[App] Initialization complete');
 
   // Check for first-time users - show onboarding wizard
@@ -359,6 +362,38 @@ function updateConnectionStatus(status) {
   };
   statusText.textContent = statusMap[status] || status;
 }
+
+// K8s connection status
+const k8sStatusEl = document.getElementById('k8s-status');
+
+async function updateK8sStatus() {
+  if (!k8sStatusEl) return;
+
+  const dot = k8sStatusEl.querySelector('.status-dot');
+  const text = k8sStatusEl.querySelector('.status-text');
+
+  try {
+    const res = await fetch('/api/k8s/health');
+    const data = await res.json();
+
+    if (data.ok) {
+      k8sStatusEl.className = 'connection-status connected';
+      text.textContent = `K8s: ${data.status?.context || 'connected'}`;
+      dot.title = `Connected to ${data.status?.mode || 'cluster'}`;
+    } else {
+      k8sStatusEl.className = 'connection-status disconnected';
+      text.textContent = 'K8s: offline';
+      dot.title = data.error || 'Not connected';
+    }
+  } catch (err) {
+    k8sStatusEl.className = 'connection-status error';
+    text.textContent = 'K8s: error';
+    dot.title = err.message;
+  }
+}
+
+// Check K8s status periodically (every 30s)
+setInterval(updateK8sStatus, 30000);
 
 // Data loading
 async function loadInitialData() {
