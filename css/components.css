@@ -1022,6 +1022,285 @@ select {
   min-width: 150px;
 }
 
+/* === K8s Convoy Card === */
+.k8s-convoy-list-container {
+  padding: var(--space-lg);
+}
+
+.k8s-convoy-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-lg);
+}
+
+.k8s-convoy-count {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: var(--text-lg);
+  font-weight: 600;
+}
+
+.k8s-convoy-count .material-icons {
+  color: #f59e0b;
+}
+
+.k8s-convoy-filters {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.k8s-convoy-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  gap: var(--space-lg);
+}
+
+.k8s-convoy-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  transition: all var(--transition-fast);
+}
+
+.k8s-convoy-card:hover {
+  border-color: var(--border-accent);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.k8s-convoy-header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+.k8s-convoy-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-md);
+}
+
+.k8s-convoy-icon .material-icons {
+  font-size: 24px;
+}
+
+.k8s-convoy-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.k8s-convoy-name {
+  font-size: var(--text-lg);
+  font-weight: 600;
+  margin-bottom: var(--space-xxs);
+  word-break: break-word;
+}
+
+.k8s-convoy-namespace {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xxs);
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+.k8s-convoy-namespace .material-icons {
+  font-size: 14px;
+}
+
+.k8s-convoy-badges {
+  display: flex;
+  gap: var(--space-xs);
+  flex-shrink: 0;
+}
+
+.k8s-convoy-title-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  padding: var(--space-sm);
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-md);
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.k8s-convoy-title-row .material-icons {
+  font-size: 16px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.k8s-convoy-title-row .title-text {
+  flex: 1;
+  line-height: 1.4;
+}
+
+.k8s-convoy-progress-section {
+  margin-bottom: var(--space-md);
+}
+
+.k8s-convoy-progress-bar {
+  margin-bottom: var(--space-sm);
+}
+
+.progress-bar-track {
+  position: relative;
+  height: 8px;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  border-radius: var(--radius-full);
+  transition: width var(--transition-base);
+}
+
+.progress-bar-fill.progress-succeeded {
+  background: #22c55e;
+  left: 0;
+}
+
+.progress-bar-fill.progress-running {
+  background: #f59e0b;
+}
+
+.progress-bar-fill.progress-failed {
+  background: #ef4444;
+}
+
+.k8s-convoy-stats {
+  display: flex;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.k8s-convoy-stats .stat {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xxs);
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+
+.k8s-convoy-stats .stat .material-icons {
+  font-size: 16px;
+}
+
+.k8s-convoy-stats .stat-succeeded {
+  color: #22c55e;
+}
+
+.k8s-convoy-stats .stat-running {
+  color: #f59e0b;
+}
+
+.k8s-convoy-stats .stat-failed {
+  color: #ef4444;
+}
+
+.k8s-convoy-stats .stat-pending {
+  color: #6b7280;
+}
+
+.k8s-convoy-stats .stat-total {
+  color: var(--text-secondary);
+}
+
+.k8s-convoy-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+.k8s-convoy-detail {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xxs);
+  font-size: var(--text-sm);
+}
+
+.k8s-convoy-detail .material-icons {
+  font-size: 16px;
+  color: var(--text-muted);
+}
+
+.k8s-convoy-members {
+  padding: var(--space-sm);
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-md);
+}
+
+.k8s-convoy-members .members-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: var(--space-sm);
+}
+
+.k8s-convoy-members .members-header .material-icons {
+  font-size: 16px;
+}
+
+.k8s-convoy-members .members-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+.k8s-convoy-members .member-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xxs);
+  padding: var(--space-xxs) var(--space-sm);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-xs);
+}
+
+.k8s-convoy-members .member-phase-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.k8s-convoy-members .member-name {
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.k8s-convoy-members .member-more {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.k8s-convoy-actions {
+  display: flex;
+  gap: var(--space-sm);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--border-default);
+}
+
 /* === Crew Card === */
 .crew-list {
   padding: var(--space-lg);

@@ -719,6 +719,49 @@ document.addEventListener('polecats:updated', (e) => {
   }
 });
 
+// K8s Convoys
+let k8sConvoysCache = [];
+
+async function loadK8sConvoysView() {
+  // Show loading state only if we don't have cached data
+  if (k8sConvoysCache.length === 0) {
+    showLoadingState(elements.k8sConvoyList, 'Loading K8s Convoys...');
+  } else {
+    renderK8sConvoyList(elements.k8sConvoyList, k8sConvoysCache);
+  }
+
+  try {
+    const convoys = await loadK8sConvoys();
+    k8sConvoysCache = convoys;
+    renderK8sConvoyList(elements.k8sConvoyList, convoys);
+  } catch (err) {
+    console.error('[App] Failed to load K8s convoys:', err);
+    if (k8sConvoysCache.length === 0) {
+      elements.k8sConvoyList.innerHTML = `
+        <div class="empty-state">
+          <span class="material-icons">cloud_off</span>
+          <h3>K8s Connection Error</h3>
+          <p>Failed to load Convoys: ${err.message}</p>
+          <p class="empty-hint">Check that the K8s API is accessible</p>
+        </div>
+      `;
+    }
+  }
+}
+
+// Listen for convoy updates
+document.addEventListener('k8s:convoys:updated', (e) => {
+  k8sConvoysCache = e.detail.convoys;
+  if (elements.k8sConvoyList) {
+    renderK8sConvoyList(elements.k8sConvoyList, k8sConvoysCache);
+  }
+});
+
+// Listen for convoy refresh requests
+document.addEventListener('k8s:convoys:refresh', () => {
+  loadK8sConvoysView();
+});
+
 // Track work filter state
 let workFilter = 'closed'; // Default to showing completed work
 
