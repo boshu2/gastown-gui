@@ -272,6 +272,16 @@ MIT
 - **GUI Implementation:** Built with Claude Code
 - **Original PR:** [#212](https://github.com/steveyegge/gastown/pull/212)
 
+### Contributors
+
+Thanks to these community members who contributed to the original PR through testing, comments, and recommended fixes:
+
+- [@gsxdsm](https://github.com/gsxdsm)
+- [@michaellady](https://github.com/michaellady)
+- [@olivierlefloch](https://github.com/olivierlefloch)
+- [@zalo](https://github.com/zalo)
+- [@irelandpaul](https://github.com/irelandpaul)
+
 ---
 
 **Disclaimer:** This is an independent community project, not officially affiliated with Gas Town. Use at your own risk.
