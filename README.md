@@ -259,8 +259,14 @@ Contributions welcome!
 
 1. Fork the repository
 2. Create a feature branch
-3. Run tests: `npm test`
-4. Submit a pull request
+3. Make your changes
+4. Test locally (start server with `npm start`, verify in browser)
+5. Run automated tests: `npm test` (206 tests must pass)
+6. Submit a pull request
+
+### Looking for Maintainers
+
+We're looking for maintainers to help review and merge PRs. If you're interested in helping maintain this project, please open an issue or reach out!
 
 ---
 
