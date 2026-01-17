@@ -8,6 +8,10 @@ A standalone web GUI for [Gas Town](https://github.com/steveyegge/gastown) - the
 
 > **Note:** This is an independent companion project, not part of the official Gas Town repository. Originally submitted as [PR #212](https://github.com/steveyegge/gastown/pull/212), now maintained as a standalone package per Steve's recommendation.
 
+> *"Thank you for the impressive work on this GUI! The effort and thought that went into it is clear - the architecture is clean, the documentation is thorough, and it demonstrates a solid understanding of Gas Town's workflow. [...] If you're interested in continuing this work, I'd encourage publishing it as a standalone companion project."*
+>
+> — **Steve Yegge**, creator of Gas Town ([PR #212 comment](https://github.com/steveyegge/gastown/pull/212))
+
 **Status:** 🚧 **Candidate for Testing** - Provides a solid starting point for a Gas Town GUI interface.
 
 ---
