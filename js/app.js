@@ -724,8 +724,12 @@ function subscribeToState() {
 // Keyboard shortcuts
 function setupKeyboardShortcuts() {
   document.addEventListener('keydown', (e) => {
-    // Ignore if in input/textarea
-    if (e.target.matches('input, textarea, select')) return;
+    // Ignore if in input/textarea/contenteditable
+    if (e.target.matches('input, textarea, select, [contenteditable]')) return;
+    if (e.target.isContentEditable) return;
+    // Also check active element (belt and suspenders)
+    const active = document.activeElement;
+    if (active && active.matches('input, textarea, select, [contenteditable]')) return;
 
     // Simple key shortcuts (no modifier)
     if (!e.ctrlKey && !e.metaKey && !e.altKey) {
