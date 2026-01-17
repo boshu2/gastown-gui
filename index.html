@@ -75,6 +75,10 @@
             <span class="material-icons">groups</span>
             Agents
           </button>
+          <button class="nav-tab" data-view="workers" data-tooltip="Unified view of all workers (local + K8s).">
+            <span class="material-icons">engineering</span>
+            Workers
+          </button>
           <button class="nav-tab" data-view="rigs" data-tooltip="Git projects with their agents and GitHub integration.">
             <span class="material-icons">folder_special</span>
             Rigs
@@ -248,6 +252,21 @@
             </div>
           </div>
           <div class="agent-grid" id="agent-grid">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- Combined Workers View -->
+        <div class="view" id="view-workers">
+          <div class="view-header">
+            <h1>All Workers</h1>
+            <div class="view-actions">
+              <button class="btn btn-sm btn-icon" id="workers-refresh" title="Refresh">
+                <span class="material-icons">refresh</span>
+              </button>
+            </div>
+          </div>
+          <div class="combined-worker-list" id="combined-worker-list">
             <!-- Populated by JS -->
           </div>
         </div>

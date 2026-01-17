@@ -29,6 +29,7 @@ import { startTutorial, shouldShowTutorial } from './components/tutorial.js';
 import { startOnboarding, shouldShowOnboarding, resetOnboarding } from './components/onboarding.js';
 import { initModeToggle, getCurrentMode, setMode, MODES } from './components/mode-toggle.js';
 import { initSettingsPanel, getSettings } from './components/settings-panel.js';
+import { renderCombinedWorkerView, loadCombinedWorkers } from './components/combined-worker-view.js';
 
 // DOM Elements
 const elements = {
@@ -46,6 +47,7 @@ const elements = {
   rigList: document.getElementById('rig-list'),
   polecatList: document.getElementById('polecat-list-container'),
   k8sConvoyList: document.getElementById('k8s-convoy-list-container'),
+  combinedWorkerList: document.getElementById('combined-worker-list'),
 };
 
 // Initialization guard to prevent double-init
@@ -87,6 +89,9 @@ async function init() {
 
   // Set up modals
   initModals();
+
+  // Set up settings panel
+  initSettingsPanel();
 
   // Set up polecat detail modal
   initPolecatDetailModal();
@@ -286,6 +291,8 @@ function switchView(viewId) {
     loadK8sPolecats();
   } else if (viewId === 'k8s-convoys') {
     loadK8sConvoysView();
+  } else if (viewId === 'workers') {
+    loadWorkers();
   }
 }
 
@@ -797,6 +804,40 @@ document.addEventListener('k8s:convoys:refresh', () => {
   loadK8sConvoysView();
 });
 
+// Combined Workers (local + K8s)
+let combinedWorkersCache = [];
+
+async function loadWorkers() {
+  // Show loading state only if we don't have cached data
+  if (combinedWorkersCache.length === 0) {
+    showLoadingState(elements.combinedWorkerList, 'Loading workers...');
+  } else {
+    renderCombinedWorkerView(elements.combinedWorkerList, combinedWorkersCache);
+  }
+
+  try {
+    const workers = await loadCombinedWorkers();
+    combinedWorkersCache = workers;
+    renderCombinedWorkerView(elements.combinedWorkerList, workers);
+  } catch (err) {
+    console.error('[App] Failed to load combined workers:', err);
+    if (combinedWorkersCache.length === 0) {
+      elements.combinedWorkerList.innerHTML = `
+        <div class="empty-state">
+          <span class="material-icons">error_outline</span>
+          <h3>Error Loading Workers</h3>
+          <p>Failed to load workers: ${err.message}</p>
+        </div>
+      `;
+    }
+  }
+}
+
+// Listen for workers refresh requests
+document.addEventListener('workers:refresh', () => {
+  loadWorkers();
+});
+
 // Track work filter state
 let workFilter = 'closed'; // Default to showing completed work
 
@@ -1142,6 +1183,12 @@ document.getElementById('crew-refresh')?.addEventListener('click', () => {
 // Crew refresh event (triggered by crew-list.js after add/remove)
 document.addEventListener('crew:refresh', () => {
   loadCrews();
+});
+
+// Workers refresh button
+document.getElementById('workers-refresh')?.addEventListener('click', () => {
+  loadWorkers();
+  showToast('Refreshing workers...', 'info', 1000);
 });
 
 // Mayor command bar
