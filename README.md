@@ -108,7 +108,7 @@ gastown-gui help
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `PORT` | Server port | 7667 |
+| `GASTOWN_PORT` | Server port | 7667 |
 | `HOST` | Server host | 127.0.0.1 |
 | `GT_ROOT` | Gas Town root directory | ~/gt |
 
