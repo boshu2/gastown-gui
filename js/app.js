@@ -14,6 +14,7 @@ import { renderActivityFeed } from './components/activity-feed.js';
 import { renderWorkList } from './components/work-list.js';
 import { renderMailList } from './components/mail-list.js';
 import { renderRigList } from './components/rig-list.js';
+import { renderPolecatList, loadPolecats, handlePolecatEvent } from './components/polecat-list.js';
 import { renderCrewList, loadCrews, showNewCrewModal } from './components/crew-list.js';
 import { initPRList, loadPRs } from './components/pr-list.js';
 import { initFormulaList, loadFormulas } from './components/formula-list.js';
@@ -39,6 +40,7 @@ const elements = {
   feedList: document.getElementById('feed-list'),
   mailList: document.getElementById('mail-list'),
   rigList: document.getElementById('rig-list'),
+  polecatList: document.getElementById('polecat-list-container'),
 };
 
 // Initialization guard to prevent double-init
@@ -239,6 +241,8 @@ function switchView(viewId) {
     loadIssues();
   } else if (viewId === 'health') {
     loadHealthCheck();
+  } else if (viewId === 'k8s-polecats') {
+    loadK8sPolecats();
   }
 }
 
@@ -342,6 +346,14 @@ function handleWebSocketMessage(message) {
       }
       // Refresh status and update state to re-render sidebar
       api.getStatus().then(status => state.setStatus(status)).catch(console.error);
+      break;
+
+    // K8s Polecat events
+    case 'k8s:polecat:added':
+    case 'k8s:polecat:modified':
+    case 'k8s:polecat:deleted':
+      const eventType = message.type.split(':').pop(); // 'added', 'modified', or 'deleted'
+      handlePolecatEvent(eventType, message.data);
       break;
 
     default:
@@ -652,6 +664,44 @@ async function loadRigs() {
     }
   }
 }
+
+// K8s Polecats
+let k8sPolecatsCache = [];
+
+async function loadK8sPolecats() {
+  // Show loading state only if we don't have cached data
+  if (k8sPolecatsCache.length === 0) {
+    showLoadingState(elements.polecatList, 'Loading K8s Polecats...');
+  } else {
+    renderPolecatList(elements.polecatList, k8sPolecatsCache);
+  }
+
+  try {
+    const polecats = await loadPolecats();
+    k8sPolecatsCache = polecats;
+    renderPolecatList(elements.polecatList, polecats);
+  } catch (err) {
+    console.error('[App] Failed to load K8s polecats:', err);
+    if (k8sPolecatsCache.length === 0) {
+      elements.polecatList.innerHTML = `
+        <div class="empty-state">
+          <span class="material-icons">cloud_off</span>
+          <h3>K8s Connection Error</h3>
+          <p>Failed to load Polecats: ${err.message}</p>
+          <p class="empty-hint">Check that the K8s API is accessible</p>
+        </div>
+      `;
+    }
+  }
+}
+
+// Listen for polecat updates
+document.addEventListener('polecats:updated', (e) => {
+  k8sPolecatsCache = e.detail.polecats;
+  if (elements.polecatList) {
+    renderPolecatList(elements.polecatList, k8sPolecatsCache);
+  }
+});
 
 // Track work filter state
 let workFilter = 'closed'; // Default to showing completed work

@@ -79,6 +79,10 @@
             <span class="material-icons">folder_special</span>
             Rigs
           </button>
+          <button class="nav-tab" data-view="k8s-polecats" data-tooltip="Kubernetes Polecat resources (gastown.gastown.io CRDs).">
+            <span class="material-icons">cloud</span>
+            K8s Polecats
+          </button>
           <button class="nav-tab" data-view="crews" data-tooltip="Teams of polecats for coordinated work.">
             <span class="material-icons">groups</span>
             Crews
@@ -249,6 +253,24 @@
             </div>
           </div>
           <div class="rig-list" id="rig-list">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- K8s Polecats View -->
+        <div class="view" id="view-k8s-polecats">
+          <div class="view-header">
+            <h1>K8s Polecats</h1>
+            <div class="view-actions">
+              <select id="k8s-namespace-select" class="namespace-select">
+                <option value="">All Namespaces</option>
+              </select>
+              <button class="btn btn-sm btn-icon" id="k8s-polecats-refresh" title="Refresh">
+                <span class="material-icons">refresh</span>
+              </button>
+            </div>
+          </div>
+          <div class="polecat-list-container" id="polecat-list-container">
             <!-- Populated by JS -->
           </div>
         </div>
