@@ -1007,6 +1007,37 @@ mayorInput.addEventListener('keydown', (e) => {
   }
 });
 
+// Mayor output panel input (terminal-style)
+const mayorOutputInput = document.getElementById('mayor-output-input');
+async function sendFromOutputPanel() {
+  const message = mayorOutputInput.value.trim();
+  if (!message) return;
+
+  mayorOutputInput.disabled = true;
+  try {
+    const result = await api.nudge('mayor', message);
+    if (result.success) {
+      mayorOutputInput.value = '';
+      // Refresh output immediately to show the command
+      refreshMayorOutput();
+    } else {
+      showToast('Failed: ' + (result.error || 'Unknown error'), 'error');
+    }
+  } catch (err) {
+    showToast('Error: ' + err.message, 'error');
+  } finally {
+    mayorOutputInput.disabled = false;
+    mayorOutputInput.focus();
+  }
+}
+
+mayorOutputInput?.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendFromOutputPanel();
+  }
+});
+
 // Mayor output panel
 const mayorViewBtn = document.getElementById('mayor-view-btn');
 const mayorOutputPanel = document.getElementById('mayor-output-panel');

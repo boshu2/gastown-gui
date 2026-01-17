@@ -223,6 +223,36 @@ body {
   background: var(--border-primary);
 }
 
+/* Mayor output input bar */
+.mayor-output-input-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  border-top: 1px solid var(--border-primary);
+  background: var(--bg-tertiary);
+}
+
+.mayor-prompt {
+  color: var(--primary);
+  font-family: var(--font-mono);
+  font-weight: bold;
+}
+
+#mayor-output-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  outline: none;
+}
+
+#mayor-output-input::placeholder {
+  color: var(--text-muted);
+}
+
 .header-center {
   display: flex;
   align-items: center;
