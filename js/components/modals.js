@@ -163,6 +163,79 @@ export function initModals() {
     element: document.getElementById('peek-modal'),
     onOpen: initPeekModal,
   });
+
+  // Generic dynamic modal handler
+  document.addEventListener('modal:show', (e) => {
+    showDynamicModal(e.detail);
+  });
+
+  document.addEventListener('modal:close', () => {
+    closeDynamicModal();
+  });
+}
+
+// Dynamic modal element reference
+let dynamicModal = null;
+
+/**
+ * Show a dynamic modal with custom content
+ */
+function showDynamicModal(options) {
+  const { title, content, onMount } = options;
+
+  // Create dynamic modal if it doesn't exist
+  if (!dynamicModal) {
+    dynamicModal = document.createElement('div');
+    dynamicModal.id = 'dynamic-modal';
+    dynamicModal.className = 'modal';
+    document.body.appendChild(dynamicModal);
+  }
+
+  // Build modal content
+  dynamicModal.innerHTML = `
+    <div class="modal-header">
+      <h2>${escapeHtml(title || 'Modal')}</h2>
+      <button class="btn btn-icon modal-close" data-action="close">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      ${content || ''}
+    </div>
+  `;
+
+  // Add close button handler
+  dynamicModal.querySelector('[data-action="close"]')?.addEventListener('click', closeDynamicModal);
+
+  // Add cancel button handler (for forms)
+  dynamicModal.querySelectorAll('[data-action="close"], .btn-ghost[data-action="close"]').forEach(btn => {
+    btn.addEventListener('click', closeDynamicModal);
+  });
+
+  // Show overlay and modal
+  overlay?.classList.remove('hidden');
+  dynamicModal.classList.remove('hidden');
+
+  // Call onMount callback for custom initialization
+  if (onMount) {
+    onMount(dynamicModal);
+  }
+
+  // Focus first input
+  const firstInput = dynamicModal.querySelector('input, textarea, select');
+  if (firstInput) {
+    setTimeout(() => firstInput.focus(), 100);
+  }
+}
+
+/**
+ * Close the dynamic modal
+ */
+function closeDynamicModal() {
+  if (dynamicModal) {
+    dynamicModal.classList.add('hidden');
+  }
+  overlay?.classList.add('hidden');
 }
 
 /**
