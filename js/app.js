@@ -30,6 +30,7 @@ import { startOnboarding, shouldShowOnboarding, resetOnboarding } from './compon
 import { initModeToggle, getCurrentMode, setMode, MODES } from './components/mode-toggle.js';
 import { initSettingsPanel, getSettings } from './components/settings-panel.js';
 import { renderCombinedWorkerView, loadCombinedWorkers } from './components/combined-worker-view.js';
+import { renderMetricsDashboard } from './components/k8s-metrics-dashboard.js';
 
 // DOM Elements
 const elements = {
@@ -47,6 +48,7 @@ const elements = {
   rigList: document.getElementById('rig-list'),
   polecatList: document.getElementById('polecat-list-container'),
   k8sConvoyList: document.getElementById('k8s-convoy-list-container'),
+  k8sMetricsContainer: document.getElementById('k8s-metrics-container'),
   combinedWorkerList: document.getElementById('combined-worker-list'),
 };
 
@@ -291,6 +293,8 @@ function switchView(viewId) {
     loadK8sPolecats();
   } else if (viewId === 'k8s-convoys') {
     loadK8sConvoysView();
+  } else if (viewId === 'k8s-metrics') {
+    loadK8sMetrics();
   } else if (viewId === 'workers') {
     loadWorkers();
   }
@@ -803,6 +807,13 @@ document.addEventListener('k8s:convoys:updated', (e) => {
 document.addEventListener('k8s:convoys:refresh', () => {
   loadK8sConvoysView();
 });
+
+// K8s Metrics Dashboard
+async function loadK8sMetrics() {
+  if (elements.k8sMetricsContainer) {
+    renderMetricsDashboard(elements.k8sMetricsContainer);
+  }
+}
 
 // Combined Workers (local + K8s)
 let combinedWorkersCache = [];

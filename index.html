@@ -91,6 +91,10 @@
             <span class="material-icons">local_shipping</span>
             K8s Convoys
           </button>
+          <button class="nav-tab" data-view="k8s-metrics" data-tooltip="K8s metrics dashboard with aggregated stats and charts.">
+            <span class="material-icons">analytics</span>
+            K8s Metrics
+          </button>
           <button class="nav-tab" data-view="crews" data-tooltip="Teams of polecats for coordinated work.">
             <span class="material-icons">groups</span>
             Crews
@@ -319,6 +323,13 @@
             </div>
           </div>
           <div class="k8s-convoy-list-container" id="k8s-convoy-list-container">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- K8s Metrics View -->
+        <div class="view" id="view-k8s-metrics">
+          <div class="k8s-metrics-container" id="k8s-metrics-container">
             <!-- Populated by JS -->
           </div>
         </div>

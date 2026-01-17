@@ -11,6 +11,8 @@ import { api } from '../api.js';
 import { showToast } from './toast.js';
 import { escapeHtml } from '../utils/html.js';
 import { showDeletePolecatModal, showCreatePolecatModal } from './k8s-modals.js';
+import { showLogsViewer } from './k8s-logs-viewer.js';
+import { showSlingToLocalModal } from './k8s-sling-modals.js';
 
 // Source configuration
 const SOURCE_CONFIG = {
@@ -381,6 +383,9 @@ function renderWorkerCard(worker, index) {
             <span class="material-icons">terminal</span>
             Logs
           </button>
+          <button class="btn btn-sm btn-secondary" data-action="import" data-worker="${escapeHtml(worker.id)}" title="Import to local">
+            <span class="material-icons">download</span>
+          </button>
           <button class="btn btn-sm btn-danger-ghost" data-action="delete" data-worker="${escapeHtml(worker.id)}" title="Delete automaton">
             <span class="material-icons">delete</span>
           </button>
@@ -471,6 +476,22 @@ function setupCardActions(container) {
       }
     });
   });
+
+  // Import button (K8s only)
+  container.querySelectorAll('[data-action="import"]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const workerId = btn.dataset.worker;
+      const worker = workersCache.find(w => w.id === workerId);
+      if (worker && worker.source === 'k8s') {
+        showSlingToLocalModal({
+          name: worker.name,
+          namespace: worker.namespace,
+          phase: worker.status,
+        });
+      }
+    });
+  });
 }
 
 /**
@@ -490,10 +511,13 @@ function showWorkerOutput(workerId) {
  * Show worker logs (K8s polecats)
  */
 function showWorkerLogs(workerId) {
-  document.dispatchEvent(new CustomEvent('polecat:logs', {
-    detail: { polecatId: workerId }
-  }));
-  showToast(`Loading logs for ${workerId}...`, 'info');
+  const worker = workersCache.find(w => w.id === workerId);
+  if (worker && worker.source === 'k8s') {
+    showLogsViewer({
+      name: worker.name,
+      namespace: worker.namespace,
+    });
+  }
 }
 
 /**

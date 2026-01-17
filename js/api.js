@@ -393,6 +393,52 @@ export const api = {
     const query = namespace ? `?namespace=${encodeURIComponent(namespace)}` : '';
     return this.get(`/api/k8s/forges${query}`);
   },
+
+  // === K8s Wave 4: Logs, Metrics, Cross-Sling ===
+
+  // Get polecat logs
+  getK8sPolecatLogs(namespace, name, options = {}) {
+    const params = new URLSearchParams();
+    if (options.tailLines) params.set('tailLines', options.tailLines);
+    if (options.timestamps === false) params.set('timestamps', 'false');
+    if (options.previous) params.set('previous', 'true');
+    if (options.sinceSeconds) params.set('sinceSeconds', options.sinceSeconds);
+    const query = params.toString();
+    return this.request(`/api/k8s/polecats/${encodeURIComponent(namespace)}/${encodeURIComponent(name)}/logs${query ? '?' + query : ''}`, {
+      headers: { Accept: 'text/plain' },
+    }).then(res => res.text ? res.text() : res);
+  },
+
+  // Get aggregated K8s metrics
+  getK8sMetrics(namespace) {
+    const query = namespace ? `?namespace=${encodeURIComponent(namespace)}` : '';
+    return this.get(`/api/k8s/metrics${query}`);
+  },
+
+  // Export K8s metrics as CSV (returns URL for download)
+  getK8sMetricsExportUrl(namespace) {
+    const query = namespace ? `?namespace=${encodeURIComponent(namespace)}` : '';
+    return `${window.location.origin}/api/k8s/metrics/export${query}`;
+  },
+
+  // Sling local bead to K8s
+  slingToK8s(beadId, options = {}) {
+    return this.post('/api/sling-to-k8s', {
+      beadId,
+      namespace: options.namespace,
+      forgeRef: options.forgeRef,
+      sdk: options.sdk,
+    });
+  },
+
+  // Sling K8s automaton result to local bead
+  slingToLocal(automatonName, namespace, rig) {
+    return this.post('/api/sling-to-local', {
+      automatonName,
+      namespace,
+      rig,
+    });
+  },
 };
 
 // WebSocket Client

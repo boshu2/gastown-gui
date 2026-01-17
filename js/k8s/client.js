@@ -518,6 +518,194 @@ export async function listForges(namespace = connectionStatus.namespace) {
   }
 }
 
+// ============= Wave 4: Logs, Metrics, Cross-Sling =============
+
+/**
+ * Get logs from a Polecat's pod
+ * @param {string} name - Polecat name
+ * @param {string} namespace - Namespace
+ * @param {Object} options - Log options
+ * @returns {Promise<string>} Log content
+ */
+export async function getPolecatLogs(name, namespace = connectionStatus.namespace, options = {}) {
+  if (!coreApi) throw new Error('Client not initialized');
+
+  // First get the polecat to find its pod
+  const polecat = await getPolecat(name, namespace);
+  const podName = polecat.raw?.status?.podName || `polecat-${name}`;
+
+  const logOptions = {
+    follow: options.follow || false,
+    tailLines: options.tailLines || 100,
+    timestamps: options.timestamps !== false,
+    previous: options.previous || false,
+    sinceSeconds: options.sinceSeconds,
+    container: options.container,
+  };
+
+  try {
+    const response = await coreApi.readNamespacedPodLog({
+      name: podName,
+      namespace,
+      ...logOptions,
+    });
+    return response;
+  } catch (err) {
+    if (err.statusCode === 404) {
+      throw new Error(`Pod not found for polecat ${name}`);
+    }
+    throw err;
+  }
+}
+
+/**
+ * Stream logs from a Polecat's pod (returns a readable stream)
+ * @param {string} name - Polecat name
+ * @param {string} namespace - Namespace
+ * @param {Function} onData - Callback for each log chunk
+ * @param {Object} options - Log options
+ * @returns {Promise<Object>} Stream control object with abort()
+ */
+export async function streamPolecatLogs(name, namespace = connectionStatus.namespace, onData, options = {}) {
+  if (!kubeConfig) throw new Error('Client not initialized');
+
+  // First get the polecat to find its pod
+  const polecat = await getPolecat(name, namespace);
+  const podName = polecat.raw?.status?.podName || `polecat-${name}`;
+
+  const log = new k8s.Log(kubeConfig);
+
+  const logStream = new (await import('stream')).PassThrough();
+
+  logStream.on('data', (chunk) => {
+    onData(chunk.toString());
+  });
+
+  const abortController = new AbortController();
+
+  try {
+    await log.log(namespace, podName, options.container, logStream, {
+      follow: true,
+      tailLines: options.tailLines || 100,
+      timestamps: options.timestamps !== false,
+      pretty: false,
+    });
+  } catch (err) {
+    if (err.statusCode === 404) {
+      throw new Error(`Pod not found for polecat ${name}`);
+    }
+    throw err;
+  }
+
+  return {
+    abort: () => {
+      abortController.abort();
+      logStream.destroy();
+    },
+    stream: logStream,
+  };
+}
+
+/**
+ * Get aggregated metrics for all Polecats
+ * @param {string} namespace - Namespace (optional, all if not specified)
+ * @returns {Promise<Object>} Aggregated metrics
+ */
+export async function getPolecatMetrics(namespace) {
+  const polecats = await listPolecats(namespace);
+
+  const metrics = {
+    total: polecats.length,
+    byPhase: {},
+    totals: {
+      iterations: 0,
+      tokensUsed: 0,
+      costUsd: 0,
+      durationSeconds: 0,
+    },
+    averages: {
+      iterations: 0,
+      tokensUsed: 0,
+      costUsd: 0,
+      durationSeconds: 0,
+    },
+    polecats: [],
+  };
+
+  polecats.forEach(p => {
+    // Count by phase
+    const phase = p.phase || 'Unknown';
+    metrics.byPhase[phase] = (metrics.byPhase[phase] || 0) + 1;
+
+    // Aggregate metrics
+    if (p.metrics) {
+      metrics.totals.iterations += p.metrics.iterations || 0;
+      metrics.totals.tokensUsed += p.metrics.tokensUsed || 0;
+      metrics.totals.costUsd += p.metrics.costUsd || 0;
+      metrics.totals.durationSeconds += p.metrics.duration || 0;
+    }
+
+    // Collect per-polecat data for charts
+    metrics.polecats.push({
+      name: p.name,
+      namespace: p.namespace,
+      phase: p.phase,
+      createdAt: p.createdAt,
+      metrics: p.metrics || {},
+    });
+  });
+
+  // Calculate averages
+  const completedCount = (metrics.byPhase['Succeeded'] || 0) + (metrics.byPhase['Failed'] || 0);
+  if (completedCount > 0) {
+    metrics.averages.iterations = metrics.totals.iterations / completedCount;
+    metrics.averages.tokensUsed = metrics.totals.tokensUsed / completedCount;
+    metrics.averages.costUsd = metrics.totals.costUsd / completedCount;
+    metrics.averages.durationSeconds = metrics.totals.durationSeconds / completedCount;
+  }
+
+  return metrics;
+}
+
+/**
+ * Create a Polecat from a local bead (cross-environment sling)
+ * @param {Object} options - Sling options
+ * @param {string} options.beadId - Local bead ID
+ * @param {string} options.beadTitle - Bead title (objective)
+ * @param {string} options.beadDescription - Bead description
+ * @param {string} options.namespace - Target namespace
+ * @param {string} options.forgeRef - Forge reference
+ * @param {Object} options.sdk - SDK configuration
+ */
+export async function slingBeadToK8s(options) {
+  const {
+    beadId,
+    beadTitle,
+    beadDescription,
+    namespace = connectionStatus.namespace,
+    forgeRef,
+    sdk,
+  } = options;
+
+  // Generate name from bead ID
+  const name = `bead-${beadId.toLowerCase().replace(/[^a-z0-9-]/g, '-')}`;
+
+  // Create the polecat with bead linkage
+  const polecat = await createPolecat({
+    namespace,
+    name,
+    objective: beadDescription || beadTitle,
+    forgeRef,
+    sdk,
+    labels: {
+      'gastown.io/source': 'local-bead',
+      'gastown.io/bead-id': beadId,
+    },
+  });
+
+  return polecat;
+}
+
 export default {
   initClient,
   getStatus,
@@ -539,4 +727,9 @@ export default {
   deleteConvoy,
   previewConvoyMembers,
   listForges,
+  // Wave 4: Logs, Metrics, Cross-Sling
+  getPolecatLogs,
+  streamPolecatLogs,
+  getPolecatMetrics,
+  slingBeadToK8s,
 };

@@ -2671,6 +2671,185 @@ app.get('/api/k8s/forges', async (req, res) => {
   }
 });
 
+// ============= K8s Wave 4: Logs, Metrics, Cross-Sling =============
+
+// Get Polecat logs (non-streaming)
+app.get('/api/k8s/polecats/:namespace/:name/logs', async (req, res) => {
+  try {
+    const { namespace, name } = req.params;
+    const { tailLines, timestamps, previous, sinceSeconds } = req.query;
+
+    const logs = await k8sClient.getPolecatLogs(name, namespace, {
+      tailLines: tailLines ? parseInt(tailLines, 10) : 100,
+      timestamps: timestamps !== 'false',
+      previous: previous === 'true',
+      sinceSeconds: sinceSeconds ? parseInt(sinceSeconds, 10) : undefined,
+    });
+
+    res.type('text/plain').send(logs);
+  } catch (err) {
+    if (err.message.includes('not found')) {
+      return res.status(404).json({ error: err.message });
+    }
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Get aggregated K8s metrics
+app.get('/api/k8s/metrics', async (req, res) => {
+  try {
+    const { namespace } = req.query;
+    const metrics = await k8sClient.getPolecatMetrics(namespace);
+    res.json(metrics);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Sling local bead to K8s
+app.post('/api/sling-to-k8s', async (req, res) => {
+  try {
+    const { beadId, namespace, forgeRef, sdk } = req.body;
+
+    if (!beadId) {
+      return res.status(400).json({ error: 'beadId is required' });
+    }
+
+    // Get bead details from local beads system
+    let beadTitle = '';
+    let beadDescription = '';
+
+    try {
+      const beadResult = await runGTCommand(['bd', 'show', beadId, '--json']);
+      const bead = JSON.parse(beadResult);
+      beadTitle = bead.title || beadId;
+      beadDescription = bead.description || bead.title || `Work on ${beadId}`;
+    } catch (err) {
+      // If can't get bead details, use beadId as fallback
+      beadTitle = beadId;
+      beadDescription = `Work on ${beadId}`;
+    }
+
+    const polecat = await k8sClient.slingBeadToK8s({
+      beadId,
+      beadTitle,
+      beadDescription,
+      namespace,
+      forgeRef,
+      sdk,
+    });
+
+    res.status(201).json({
+      success: true,
+      polecat,
+      message: `Created automaton from bead ${beadId}`,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Sling K8s automaton result to local bead
+app.post('/api/sling-to-local', async (req, res) => {
+  try {
+    const { automatonName, namespace, rig } = req.body;
+
+    if (!automatonName) {
+      return res.status(400).json({ error: 'automatonName is required' });
+    }
+
+    // Get automaton details
+    const polecat = await k8sClient.getPolecat(automatonName, namespace);
+
+    // Check if linked to a bead
+    const beadId = polecat.labels?.['gastown.io/bead-id'];
+
+    if (!beadId) {
+      return res.status(400).json({
+        error: 'Automaton is not linked to a local bead',
+        hint: 'Only automatons created via sling-to-k8s can be synced back',
+      });
+    }
+
+    // Map automaton phase to bead status
+    const statusMap = {
+      'Succeeded': 'closed',
+      'Failed': 'closed',
+      'Running': 'in_progress',
+      'Claimed': 'in_progress',
+      'Queued': 'open',
+    };
+    const newStatus = statusMap[polecat.phase] || 'open';
+
+    // Build comment with metrics
+    const metricsText = polecat.metrics
+      ? `Metrics: ${polecat.metrics.iterations || 0} iterations, ${polecat.metrics.tokensUsed || 0} tokens`
+      : 'No metrics available';
+
+    const comment = `K8s Automaton ${automatonName} completed with phase: ${polecat.phase}. ${metricsText}`;
+
+    // Update bead status and add comment
+    try {
+      if (polecat.phase === 'Succeeded' || polecat.phase === 'Failed') {
+        const reason = polecat.phase === 'Succeeded' ? 'Completed via K8s automaton' : 'Failed in K8s automaton';
+        await runGTCommand(['bd', 'close', beadId, '--reason', reason]);
+      }
+      await runGTCommand(['bd', 'comments', 'add', beadId, comment]);
+    } catch (err) {
+      console.warn('[sling-to-local] Failed to update bead:', err.message);
+    }
+
+    res.json({
+      success: true,
+      beadId,
+      newStatus,
+      automaton: {
+        name: automatonName,
+        phase: polecat.phase,
+        metrics: polecat.metrics,
+      },
+      message: `Synced automaton ${automatonName} to bead ${beadId}`,
+    });
+  } catch (err) {
+    if (err.statusCode === 404) {
+      return res.status(404).json({ error: 'Automaton not found' });
+    }
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Export K8s metrics as CSV
+app.get('/api/k8s/metrics/export', async (req, res) => {
+  try {
+    const { namespace } = req.query;
+    const metrics = await k8sClient.getPolecatMetrics(namespace);
+
+    // Build CSV
+    const headers = ['Name', 'Namespace', 'Phase', 'Created', 'Iterations', 'Tokens', 'Cost (USD)', 'Duration (s)'];
+    const rows = metrics.polecats.map(p => [
+      p.name,
+      p.namespace,
+      p.phase,
+      p.createdAt || '',
+      p.metrics.iterations || 0,
+      p.metrics.tokensUsed || 0,
+      p.metrics.costUsd || 0,
+      p.metrics.duration || 0,
+    ]);
+
+    const csv = [
+      headers.join(','),
+      ...rows.map(r => r.map(v => `"${v}"`).join(',')),
+    ].join('\n');
+
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename="k8s-metrics-${new Date().toISOString().slice(0,10)}.csv"`);
+    res.send(csv);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ============= WebSocket for Real-time Events =============
 
 // Start activity stream
