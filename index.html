@@ -115,6 +115,13 @@
         </div>
       </div>
       <div class="header-right">
+        <!-- Mode Toggle: Local / Hybrid / K8s -->
+        <div class="mode-toggle-container" id="mode-toggle-container">
+          <!-- Populated by mode-toggle.js -->
+        </div>
+        <button class="icon-btn" id="settings-btn" title="Settings">
+          <span class="material-icons">settings</span>
+        </button>
         <button class="icon-btn" id="help-btn" title="Help & Guide" data-modal-open="help">
           <span class="material-icons">help_outline</span>
         </button>
@@ -1002,6 +1009,118 @@
             <pre class="output-content"></pre>
           </div>
         </div>
+      </div>
+
+      <!-- Settings Modal -->
+      <div class="modal hidden" id="settings-modal">
+        <div class="modal-header">
+          <h2>
+            <span class="material-icons">settings</span>
+            Settings
+          </h2>
+          <button class="modal-close" data-modal-close>
+            <span class="material-icons">close</span>
+          </button>
+        </div>
+        <form class="modal-body" id="settings-form">
+          <!-- K8s Connection Section -->
+          <div class="settings-section">
+            <h3 class="settings-section-header">
+              <span class="material-icons">cloud</span>
+              K8s Connection
+            </h3>
+            <div class="settings-status-row">
+              <span class="settings-label">Connection Status:</span>
+              <span class="settings-status-badge" id="k8s-connection-status">
+                <span class="material-icons">sync</span> Checking...
+              </span>
+            </div>
+            <div class="k8s-context-info" id="k8s-context-info">
+              <!-- Populated by JS -->
+            </div>
+            <div class="form-group">
+              <label for="k8s-namespace">Default Namespace</label>
+              <input type="text" id="k8s-namespace" name="k8s-namespace" value="default" placeholder="default">
+            </div>
+          </div>
+
+          <!-- Display Preferences Section -->
+          <div class="settings-section">
+            <h3 class="settings-section-header">
+              <span class="material-icons">visibility</span>
+              Display Preferences
+            </h3>
+            <div class="form-group">
+              <label for="display-mode">Default View Mode</label>
+              <select id="display-mode" name="display-mode">
+                <option value="local">Local Only</option>
+                <option value="k8s">K8s Only</option>
+                <option value="hybrid" selected>Hybrid (Both)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input type="checkbox" name="show-local-workers" checked>
+                Show local workers in dashboard
+              </label>
+            </div>
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input type="checkbox" name="show-k8s-workers" checked>
+                Show K8s workers in dashboard
+              </label>
+            </div>
+            <div class="form-group">
+              <label for="k8s-refresh-interval">Auto-refresh Interval</label>
+              <select id="k8s-refresh-interval" name="k8s-refresh-interval">
+                <option value="10000">10 seconds</option>
+                <option value="30000" selected>30 seconds</option>
+                <option value="60000">1 minute</option>
+                <option value="300000">5 minutes</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input type="checkbox" name="k8s-auto-refresh" checked>
+                Enable auto-refresh for K8s views
+              </label>
+            </div>
+          </div>
+
+          <!-- Notifications Section -->
+          <div class="settings-section">
+            <h3 class="settings-section-header">
+              <span class="material-icons">notifications</span>
+              Notifications
+            </h3>
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input type="checkbox" name="notify-k8s-events" checked>
+                Show toast notifications for K8s events
+              </label>
+            </div>
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input type="checkbox" name="notify-convoy-updates" checked>
+                Show toast notifications for convoy updates
+              </label>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-ghost" id="settings-reset">
+              <span class="material-icons">restart_alt</span>
+              Reset to Defaults
+            </button>
+            <div class="modal-footer-right">
+              <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
+              <button type="submit" class="btn btn-primary">
+                <span class="material-icons">save</span>
+                Save Settings
+              </button>
+            </div>
+          </div>
+        </form>
       </div>
     </div>
 

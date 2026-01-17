@@ -27,6 +27,8 @@ import { initModals } from './components/modals.js';
 import { initPolecatDetailModal } from './components/polecat-detail-modal.js';
 import { startTutorial, shouldShowTutorial } from './components/tutorial.js';
 import { startOnboarding, shouldShowOnboarding, resetOnboarding } from './components/onboarding.js';
+import { initModeToggle, getCurrentMode, setMode, MODES } from './components/mode-toggle.js';
+import { initSettingsPanel, getSettings } from './components/settings-panel.js';
 
 // DOM Elements
 const elements = {
@@ -119,6 +121,12 @@ async function init() {
   // Set up theme toggle
   setupThemeToggle();
 
+  // Set up mode toggle (Local/Hybrid/K8s)
+  const modeToggleContainer = document.getElementById('mode-toggle-container');
+  if (modeToggleContainer) {
+    initModeToggle(modeToggleContainer);
+  }
+
   // Subscribe to state changes FIRST (before loading data)
   subscribeToState();
 
@@ -176,6 +184,33 @@ async function init() {
   document.addEventListener('mail:detail', (e) => {
     const { mailId, mail } = e.detail;
     showMailDetailModal(mail);
+  });
+
+  // Handle mode changes (Local/Hybrid/K8s)
+  document.addEventListener('mode:changed', (e) => {
+    const { mode, previousMode } = e.detail;
+    console.log(`[App] Mode changed from ${previousMode} to ${mode}`);
+
+    // Show toast notification
+    const modeLabels = {
+      local: 'Local',
+      hybrid: 'Hybrid',
+      k8s: 'K8s'
+    };
+    showToast(`Switched to ${modeLabels[mode]} mode`, 'info', 2000);
+
+    // Refresh data based on new mode
+    if (mode === 'k8s' || mode === 'hybrid') {
+      // Load K8s data if switching to K8s or Hybrid mode
+      loadK8sPolecats();
+      loadK8sConvoysView();
+    }
+
+    if (mode === 'local' || mode === 'hybrid') {
+      // Refresh local data
+      loadConvoys();
+      loadRigs();
+    }
   });
 
   // Handle polecat start/stop/restart actions
@@ -1273,4 +1308,4 @@ if (document.readyState === 'loading') {
 }
 
 // Export for debugging
-window.gastown = { state, api, ws, startTutorial, startOnboarding, resetOnboarding };
+window.gastown = { state, api, ws, startTutorial, startOnboarding, resetOnboarding, getCurrentMode, setMode, MODES };
