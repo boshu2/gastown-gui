@@ -1,14 +1,14 @@
 /**
  * Gas Town GUI - Kubernetes Client
  *
- * Handles communication with Kubernetes API for olympus.io CRDs.
+ * Handles communication with Kubernetes API for gastown.gastown.io CRDs.
  * Supports both in-cluster and local kubeconfig authentication.
  */
 
 import * as k8s from '@kubernetes/client-node';
 
-// CRD configuration for olympus.io
-const CRD_GROUP = 'olympus.io';
+// CRD configuration for Gas Town
+const CRD_GROUP = 'gastown.gastown.io';
 const CRD_VERSION = 'v1alpha1';
 
 // Connection state
@@ -110,36 +110,36 @@ export async function listNamespaces() {
 }
 
 /**
- * List Automatons in a namespace
+ * List Polecats in a namespace
  */
-export async function listAutomatons(namespace = connectionStatus.namespace) {
+export async function listPolecats(namespace = connectionStatus.namespace) {
   if (!customApi) throw new Error('Client not initialized');
 
   const res = await customApi.listNamespacedCustomObject({
     group: CRD_GROUP,
     version: CRD_VERSION,
     namespace,
-    plural: 'automatons',
+    plural: 'polecats',
   });
 
-  return res.items.map(normalizeAutomaton);
+  return res.items.map(normalizePolecat);
 }
 
 /**
- * Get a specific Automaton
+ * Get a specific Polecat
  */
-export async function getAutomaton(name, namespace = connectionStatus.namespace) {
+export async function getPolecat(name, namespace = connectionStatus.namespace) {
   if (!customApi) throw new Error('Client not initialized');
 
   const res = await customApi.getNamespacedCustomObject({
     group: CRD_GROUP,
     version: CRD_VERSION,
     namespace,
-    plural: 'automatons',
+    plural: 'polecats',
     name,
   });
 
-  return normalizeAutomaton(res);
+  return normalizePolecat(res);
 }
 
 /**
@@ -176,19 +176,19 @@ export async function getConvoy(name, namespace = connectionStatus.namespace) {
 }
 
 /**
- * Watch Automatons for changes
+ * Watch Polecats for changes
  */
-export function watchAutomatons(namespace, callback) {
+export function watchPolecats(namespace, callback) {
   if (!kubeConfig) throw new Error('Client not initialized');
 
   const watch = new k8s.Watch(kubeConfig);
-  const path = `/apis/${CRD_GROUP}/${CRD_VERSION}/namespaces/${namespace}/automatons`;
+  const path = `/apis/${CRD_GROUP}/${CRD_VERSION}/namespaces/${namespace}/polecats`;
 
   return watch.watch(
     path,
     {},
     (type, obj) => {
-      callback(type.toLowerCase(), normalizeAutomaton(obj));
+      callback(type.toLowerCase(), normalizePolecat(obj));
     },
     (err) => {
       console.error('[k8s] Watch error:', err);
@@ -220,9 +220,9 @@ export function watchConvoys(namespace, callback) {
 }
 
 /**
- * Normalize Automaton CRD to UI-friendly format
+ * Normalize Polecat CRD to UI-friendly format
  */
-function normalizeAutomaton(obj) {
+function normalizePolecat(obj) {
   const meta = obj.metadata || {};
   const spec = obj.spec || {};
   const status = obj.status || {};
@@ -235,10 +235,11 @@ function normalizeAutomaton(obj) {
     objective: spec.objective,
     phase: status.phase || 'Unknown',
     healthState: status.healthState || 'Unknown',
-    forgeRef: spec.forgeRef,
+    rigRef: spec.rigRef,
     engine: spec.engine,
     executionMode: spec.executionMode,
-    sdk: spec.sdk,
+    agentType: spec.agentType,
+    agentConfig: spec.agentConfig,
     limits: spec.limits,
     metrics: status.metrics,
     conditions: status.conditions,
@@ -312,11 +313,11 @@ export default {
   getStatus,
   testConnection,
   listNamespaces,
-  listAutomatons,
-  getAutomaton,
+  listPolecats,
+  getPolecat,
   listConvoys,
   getConvoy,
-  watchAutomatons,
+  watchPolecats,
   watchConvoys,
   getContexts,
   setContext,

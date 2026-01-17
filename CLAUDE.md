@@ -65,7 +65,7 @@ npm run test:e2e     # E2E tests only
 
 ### K8s (in progress)
 - `GET /api/k8s/health` - K8s connection status
-- `GET /api/k8s/automatons` - List Automatons
+- `GET /api/k8s/polecats` - List Polecats (CRD: gastown.gastown.io/v1alpha1)
 - `GET /api/k8s/convoys` - List K8s Convoys
 
 ## Epic: Hybrid K8s Integration (gg-9kp)

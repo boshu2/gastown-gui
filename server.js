@@ -2487,26 +2487,26 @@ app.post('/api/k8s/namespace', (req, res) => {
   }
 });
 
-// List Automatons
-app.get('/api/k8s/automatons', async (req, res) => {
+// List Polecats
+app.get('/api/k8s/polecats', async (req, res) => {
   try {
     const { namespace } = req.query;
-    const automatons = await k8sClient.listAutomatons(namespace);
-    res.json({ items: automatons });
+    const polecats = await k8sClient.listPolecats(namespace);
+    res.json({ items: polecats });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// Get specific Automaton
-app.get('/api/k8s/automatons/:namespace/:name', async (req, res) => {
+// Get specific Polecat
+app.get('/api/k8s/polecats/:namespace/:name', async (req, res) => {
   try {
     const { namespace, name } = req.params;
-    const automaton = await k8sClient.getAutomaton(name, namespace);
-    res.json(automaton);
+    const polecat = await k8sClient.getPolecat(name, namespace);
+    res.json(polecat);
   } catch (err) {
     if (err.statusCode === 404) {
-      return res.status(404).json({ error: 'Automaton not found' });
+      return res.status(404).json({ error: 'Polecat not found' });
     }
     res.status(500).json({ error: err.message });
   }
