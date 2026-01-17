@@ -84,10 +84,10 @@ Tests run on Node 18, 20, and 22. All passing.
 | **Beads/Issues** | Full CRUD | Full CRUD | ✅ Good |
 | **Mail/Communication** | Full | Full | ✅ Good |
 | **GitHub Integration** | Full | Full | ✅ Good |
-| **Polecat Control** | spawn/kill/logs | start/stop only | ⚠️ 80% missing |
+| **Polecat Control** | spawn/kill/logs | ✅ spawn/stop/restart | ✅ **IMPLEMENTED** |
 | **Crew Management** | Full | ✅ Create/List/View | ✅ **IMPLEMENTED** |
 | **Agent Config** | Full | List only | ⚠️ 90% missing |
-| **Rig Management** | Full | No delete | 40% missing |
+| **Rig Management** | Full | ✅ Create/List/Delete | ✅ **IMPLEMENTED** |
 | **Formula Editor** | Full | ✅ Create/List/Use | ✅ **IMPLEMENTED** |
 
 ### ✅ Recently Implemented
@@ -104,15 +104,17 @@ Tests run on Node 18, 20, and 22. All passing.
 - ✅ Execute formulas on targets
 - ⚠️ Still needs: molecule workflows
 
+### ✅ Polecat Lifecycle - IMPLEMENTED
+
+- ✅ `spawn` - Spawn Polecat button in Rig list
+- ✅ `stop` - Stop via API
+- ✅ `restart` - Restart via API
+- ⚠️ Detailed logs view - basic output only
+- ⚠️ 3-layer monitoring - not implemented
+
 ### Still Missing Features
 
-**1. POLECAT LIFECYCLE (Most Critical)**
-- ❌ `spawn` - Create new worker agents
-- ❌ `kill` / `nuke` - Terminate workers
-- ❌ Detailed logs view
-- ❌ 3-layer monitoring (deacon/witness/boot)
-
-**2. AGENT CONFIGURATION**
+**AGENT CONFIGURATION**
 - ❌ Custom agent definitions
 - ❌ Runtime overrides
 - ❌ Per-rig settings

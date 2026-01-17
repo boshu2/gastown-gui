@@ -232,14 +232,14 @@ npm run test:watch
 
 | Feature | Status |
 |---------|--------|
-| Polecat spawn/kill/logs | ❌ CLI only |
 | Agent configuration UI | ❌ Not implemented |
-| Rig deletion | ❌ Not implemented |
 
-### Recently Implemented
+### Implemented Features
 
 | Feature | Status |
 |---------|--------|
+| Polecat spawn/stop/restart | ✅ UI in Rig list |
+| Rig deletion | ✅ Remove button in Rig list |
 | Crew management | ✅ Create/list/view |
 | Formula operations | ✅ Create/list/use |
 | Test coverage | ✅ 206 tests passing |
