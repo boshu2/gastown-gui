@@ -15,6 +15,7 @@ import { renderWorkList } from './components/work-list.js';
 import { renderMailList } from './components/mail-list.js';
 import { renderRigList } from './components/rig-list.js';
 import { renderPolecatList, loadPolecats, handlePolecatEvent } from './components/polecat-list.js';
+import { renderK8sConvoyList, loadK8sConvoys, handleConvoyEvent } from './components/k8s-convoy-list.js';
 import { renderCrewList, loadCrews, showNewCrewModal } from './components/crew-list.js';
 import { initPRList, loadPRs } from './components/pr-list.js';
 import { initFormulaList, loadFormulas } from './components/formula-list.js';
@@ -23,6 +24,7 @@ import { initHealthCheck, loadHealthCheck } from './components/health-check.js';
 import { initDashboard, loadDashboard } from './components/dashboard.js';
 import { showToast } from './components/toast.js';
 import { initModals } from './components/modals.js';
+import { initPolecatDetailModal } from './components/polecat-detail-modal.js';
 import { startTutorial, shouldShowTutorial } from './components/tutorial.js';
 import { startOnboarding, shouldShowOnboarding, resetOnboarding } from './components/onboarding.js';
 
@@ -41,6 +43,7 @@ const elements = {
   mailList: document.getElementById('mail-list'),
   rigList: document.getElementById('rig-list'),
   polecatList: document.getElementById('polecat-list-container'),
+  k8sConvoyList: document.getElementById('k8s-convoy-list-container'),
 };
 
 // Initialization guard to prevent double-init
@@ -82,6 +85,9 @@ async function init() {
 
   // Set up modals
   initModals();
+
+  // Set up polecat detail modal
+  initPolecatDetailModal();
 
   // Set up PR list
   initPRList();
@@ -243,6 +249,8 @@ function switchView(viewId) {
     loadHealthCheck();
   } else if (viewId === 'k8s-polecats') {
     loadK8sPolecats();
+  } else if (viewId === 'k8s-convoys') {
+    loadK8sConvoysView();
   }
 }
 
@@ -352,8 +360,16 @@ function handleWebSocketMessage(message) {
     case 'k8s:polecat:added':
     case 'k8s:polecat:modified':
     case 'k8s:polecat:deleted':
-      const eventType = message.type.split(':').pop(); // 'added', 'modified', or 'deleted'
-      handlePolecatEvent(eventType, message.data);
+      const polecatEventType = message.type.split(':').pop(); // 'added', 'modified', or 'deleted'
+      handlePolecatEvent(polecatEventType, message.data);
+      break;
+
+    // K8s Convoy events
+    case 'k8s:convoy:added':
+    case 'k8s:convoy:modified':
+    case 'k8s:convoy:deleted':
+      const convoyEventType = message.type.split(':').pop(); // 'added', 'modified', or 'deleted'
+      handleConvoyEvent(convoyEventType, message.data);
       break;
 
     default:

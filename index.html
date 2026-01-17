@@ -83,6 +83,10 @@
             <span class="material-icons">cloud</span>
             K8s Polecats
           </button>
+          <button class="nav-tab" data-view="k8s-convoys" data-tooltip="Kubernetes Convoy resources for coordinated Polecat groups.">
+            <span class="material-icons">local_shipping</span>
+            K8s Convoys
+          </button>
           <button class="nav-tab" data-view="crews" data-tooltip="Teams of polecats for coordinated work.">
             <span class="material-icons">groups</span>
             Crews
@@ -271,6 +275,24 @@
             </div>
           </div>
           <div class="polecat-list-container" id="polecat-list-container">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- K8s Convoys View -->
+        <div class="view" id="view-k8s-convoys">
+          <div class="view-header">
+            <h1>K8s Convoys</h1>
+            <div class="view-actions">
+              <select id="k8s-convoy-namespace-select" class="namespace-select">
+                <option value="">All Namespaces</option>
+              </select>
+              <button class="btn btn-sm btn-icon" id="k8s-convoys-refresh" title="Refresh">
+                <span class="material-icons">refresh</span>
+              </button>
+            </div>
+          </div>
+          <div class="k8s-convoy-list-container" id="k8s-convoy-list-container">
             <!-- Populated by JS -->
           </div>
         </div>
@@ -920,6 +942,31 @@
             </button>
           </div>
         </form>
+      </div>
+
+      <!-- Polecat Detail Modal -->
+      <div class="modal modal-lg hidden" id="polecat-detail-modal">
+        <div class="modal-header">
+          <h2>
+            <span class="material-icons">smart_toy</span>
+            <span id="polecat-detail-name">Polecat Details</span>
+          </h2>
+          <div class="polecat-detail-controls">
+            <button class="btn btn-sm btn-secondary" id="polecat-detail-copy-json" title="Copy raw JSON">
+              <span class="material-icons">content_copy</span>
+              Copy JSON
+            </button>
+          </div>
+          <button class="modal-close" data-modal-close>
+            <span class="material-icons">close</span>
+          </button>
+        </div>
+        <div class="modal-body polecat-detail-body">
+          <!-- Content populated by polecat-detail-modal.js -->
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-modal-close>Close</button>
+        </div>
       </div>
 
       <!-- Agent Peek Modal -->
